@@ -1,17 +1,36 @@
 <ion-header>
-  <ion-navbar>
+  <ion-navbar color='danger'>
     <ion-title>Home</ion-title>
+    <!--Buts the button at the end and makes and icon button -->
+    <ion-buttons end>
+      <button ion-button icon-only (click)="navToAddItemPage()">
+        <ion-icon name='add'></ion-icon>
+      </button>
+
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  <h2>Welcome to Ionic!</h2>
+  <!--<h2>Welcome to Ionic!</h2>
   <p>
-    This starter project comes with simple tabs-based layout for apps
-    that are going to primarily use a Tabbed UI.
+    This starter project comes with simple tabs-based layout for apps that are going to primarily use a Tabbed UI.
   </p>
   <p>
-    Take a look at the <code>src/pages/</code> directory to add or change tabs,
-    update any existing page or create new pages.
-  </p>
+    Take a look at the
+    <code>src/pages/</code> directory to add or change tabs, update any existing page or create new pages.
+  </p> -->
+
+  <!--Lets us loop through and repeate these elemest for how every
+      many there are in the array 
+      
+      *repeat ion item for as meanly itmes we have in our list
+  -->
+  <ion-list>
+    <ion-item class="text" *ngFor="let object of ItemRef | async" (click)='selectItem(object)'>
+      <h2>Item Name: {{object.itemName}}</h2>
+      <h3>Amount: {{object.itemNumber}}</h3>
+    </ion-item>
+  </ion-list>
+
 </ion-content>
