@@ -1,12 +1,16 @@
 import { Component } from '@angular/core';
-import { NavController, ActionSheetController } from 'ionic-angular';
-import { AddItemPage } from "../add-item/add-item";
+import { NavController, ActionSheetController, IonicPage } from 'ionic-angular';
 
 //Import the observable and Database
-import { AngularFireDatabase } from "angularfire2/database";
 import { Observable } from 'rxjs/Observable'
 import { Item } from "../../models/Item/item-interface";
 
+import { ItemListService } from "../../services/item/item.service";
+
+
+
+//Ionic Page dec allows us lazy load the page 
+@IonicPage()
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
@@ -14,18 +18,28 @@ import { Item } from "../../models/Item/item-interface";
 export class HomePage {
 
   //The obseravle that is of type item list
-  ItemRef: Observable<Item[]>
+  itemList: Observable<any[]>
 
   //Import the database here
   constructor(public navCtrl: NavController,
-    private database: AngularFireDatabase,
-    private actions: ActionSheetController) {
+    private actions: ActionSheetController,
+    private List: ItemListService, ) {
 
     /*We are point the itemlist ref at firebse -> 'item list node'
       Not only can we push to data base we have accues to everything insdie that node
     */
     // this.ItemRef$ = this.database.list('item-list');
-    this.ItemRef = this.database.list('item-list').valueChanges();
+
+    this.itemList = this.List
+      .getItemList() //Get the DataBase list
+      .snapshotChanges(). //Get Key and value Pairs
+      map( //Maps these cahgnes and for each one retrun a new obejct
+      changes => {
+        return changes.map(c => ({
+          key: c.payload.key,
+          ...c.payload.val()
+        }));
+      });
 
     //Prints to the console but need to display in html
     //this.itemRef.subscribe(x => console.log(x))
@@ -54,8 +68,9 @@ export class HomePage {
           role: 'destructive',
           handler: () => {
             //Deltes the item the $key is for the actual firebase key
-            // console.log(item.key);
-            //this.database.object(`/item-list/item.$key`).remove();
+            console.log(
+              item.localKey);
+            // this.ItemRef.remove(item.localKey);
           }
         },
         {
@@ -70,7 +85,13 @@ export class HomePage {
   navToAddItemPage() {
     //Navages the useres to the add Item page
     //if use set root instead of push there would be no back button
-    this.navCtrl.push(AddItemPage);
+    this.navCtrl.push("AddItemPage");
+  }
+
+  navToEditItemPage() {
+    //Navages the useres to the add Item page
+    //if use set root instead of push there would be no back button
+    this.navCtrl.push("EditItemPage");
   }
 
 }
