@@ -4,6 +4,7 @@ import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
 
 import { ItemListService } from "../services/item/item.service";
+import { ToastService } from "../services/toast/toast.service";
 
 
 import { StatusBar } from '@ionic-native/status-bar';
@@ -33,7 +34,8 @@ import { AngularFireDatabaseModule } from "angularfire2/database";
     StatusBar,
     SplashScreen,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
-    ItemListService
+    ItemListService,
+    ToastService,
   ]
 })
 export class AppModule { }

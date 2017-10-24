@@ -5,10 +5,12 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Item } from "../../models/Item/item-interface";
 
 import { ItemListService } from "../../services/item/item.service";
+import { ToastService } from "../../services/toast/toast.service";
+
 
 //Import FireBase database
 import { AngularFireDatabase, AngularFireList } from "angularfire2/database";
-import { Observable } from 'rxjs/Observable'
+
 /**
  * Generated class for the AddItemPage page.
  *
@@ -38,7 +40,8 @@ export class AddItemPage {
     public navCtrl: NavController,
     public navParams: NavParams,
     private database: AngularFireDatabase,
-    private itemList: ItemListService, ) {
+    private itemList: ItemListService,
+    private toast: ToastService) {
     this.ItemRef = this.database.list('item-list');
     /* Strcutre of firebase
       item-List:
@@ -56,43 +59,31 @@ export class AddItemPage {
 
     //Tells to add the item them take the ref of the item and print it
     this.itemList.addItem(item).then(ref => {
+      this.toast.show(`${item.itemName} added!`)
+      this.navCtrl.setRoot('HomePage', { key: ref.key })
       console.log(ref.key);
 
     })
 
 
-
-
     // //This adds the item to the fire base page and push 
     // //to our firebase data base uner item-list
-
     // //this.ItemRef$.push(this.item) //This would send the item directly
-
     // //Customize to covert the object number to number
     // var keyObject = this.ItemRef.push({
     //   itemName: this.item.itemName,
     //   itemNumber: Number(this.item.itemNumber),
     //   localKey: '',
     // });
-
     // var key = keyObject['key']
     // console.log(key);
-
-
-
-
     // this.ItemRef.update(key, {
     //   itemName: this.item.itemName,
     //   itemNumber: Number(this.item.itemNumber),
     //   localKey: key,
     // });
-
     // //Rest our Item
     // this.item = {} as Item;
-
-
-    //Take user back to home page
-    this.navCtrl.pop()
   }
 
 }

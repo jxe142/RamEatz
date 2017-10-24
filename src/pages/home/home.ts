@@ -41,8 +41,7 @@ export class HomePage {
         }));
       });
 
-    //Prints to the console but need to display in html
-    //this.itemRef.subscribe(x => console.log(x))
+
 
   }
 
