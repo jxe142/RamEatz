@@ -36,7 +36,7 @@ def token_needed(f):
             token = request.headers['token']
 
         if not token:
-            return jsonify({'message': 'Token is missing'}), 401
+            return make_response('No token provided!', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
         # see if token is vaild
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'])
@@ -50,7 +50,7 @@ def token_needed(f):
             currentUser = Vendors.query.filter_by(username=data['user']).first()
             return f(currentUser, *args, **kwargs)
         except:
-            return jsonify({'message': 'Token is invalid'}), 401
+            return make_response('Token is invaild!', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
         return f(currentUser, *args, **kwargs)
 
@@ -94,6 +94,7 @@ def login():
         return make_response('Could not verify!!!', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
 
+# These are test to make sure that the token auth works
 @app.route('/hello')
 def tryFunctions():
     return jsonify({'message': 'anyone can see'})
@@ -114,11 +115,12 @@ api.add_namespace(orders_api)
 
 @orders_api.route('/')
 class OrdersList(Resource):
-    @auth.login_required
     # @orders_api.response(UserSchema(many=True))
-    def get(self):
+    @token_needed
+    def get(currentUser, self):
         student = Students.query.first()
-        return student.as_dict()
+        # return jsonify(student.as_dict())
+        return ''
 
 
 @orders_api.route('/<int:user_id>')
