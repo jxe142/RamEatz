@@ -1,9 +1,13 @@
-from flask import Flask
+from flask import Flask, jsonify, request, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
 from flask import request, redirect
 from flask_restplus import Api, Resource, Namespace
+from functools import wraps
 import os
+import jwt
+import datetime
+
 
 #==============================================================
 # Config of the app
@@ -22,16 +26,83 @@ from models import *  # Get all the parts of the database we need
 #==============================================================
 
 
-@auth.verify_password
-def verify(username, password):
-    if not (username, password):
-        return False
-    else:
-        user = Students.query.filter_by(username=username)
-        if(user.password == password):
-            return True
-        else:
-            return False
+def token_needed(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        # Get the token
+        token = None
+
+        if 'token' in request.headers:
+            token = request.headers['token']
+
+        if not token:
+            return jsonify({'message': 'Token is missing'}), 401
+        # see if token is vaild
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            currentUser = Students.query.filter_by(username=data['user']).first()
+            return f(currentUser, *args, **kwargs)
+        except:
+            pass
+
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            currentUser = Vendors.query.filter_by(username=data['user']).first()
+            return f(currentUser, *args, **kwargs)
+        except:
+            return jsonify({'message': 'Token is invalid'}), 401
+
+        return f(currentUser, *args, **kwargs)
+
+    return decorated
+
+
+@app.route('/login')
+def login():
+    aut = request.authorization  # Gives use the username and password sent
+
+    if(not aut or not aut.username or not aut.password):  # No usrname no password, or either
+        return make_response('Could not verify!', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+    try:
+        user = Students.query.filter_by(username=aut.username).first()
+        if(user.password == aut.password):  # if the passwords matach
+            token = jwt.encode({
+                'user': aut.username,  # Tells who the user is
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)  # make it expire after 30 minutes
+            }, app.config['SECRET_KEY'])
+            return jsonify({'token': token.decode('UTF-8')})
+    except:
+        pass
+
+    try:
+        user = Vendors.query.filter_by(username=aut.username).first()
+    except:
+        pass
+
+    if(not user):
+        return make_response('Could not verify!!', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+    if(user.password == aut.password):  # if the passwords matach
+        token = jwt.encode({
+            'user': aut.username,  # Tells who the user is
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)  # make it expire after 30 minutes
+        }, app.config['SECRET_KEY'])
+        return jsonify({'token': token.decode('UTF-8')})
+        # return make_response
+
+        return make_response('Could not verify!!!', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+
+@app.route('/hello')
+def tryFunctions():
+    return jsonify({'message': 'anyone can see'})
+
+
+@app.route('/helloPro')
+@token_needed
+def try2(currentUser):
+    return jsonify({'message': 'only a few can see'})
 
 
 #==============================================================
@@ -43,7 +114,7 @@ api.add_namespace(orders_api)
 
 @orders_api.route('/')
 class OrdersList(Resource):
-    # @auth.login_required
+    @auth.login_required
     # @orders_api.response(UserSchema(many=True))
     def get(self):
         student = Students.query.first()
@@ -80,12 +151,6 @@ def makeVendors():
     #     db.session.add(user)  # save to database
     #     db.session.commit()
     #     return "Hi"
-
-
-@api.route('/hello')
-class HelloWorld(Resource):
-    def get(self):
-        return {'hello': 'world'}
 
 
 @app.route('/burgerStudio/comp')
