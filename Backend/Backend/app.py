@@ -5,6 +5,7 @@ from flask import request, redirect
 from flask_restplus import Api, Resource, Namespace
 from functools import wraps
 import os
+import json
 import jwt
 import datetime
 
@@ -40,15 +41,15 @@ def token_needed(f):
         # see if token is vaild
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'])
-            currentUser = Students.query.filter_by(username=data['user']).first()
-            return f(currentUser, *args, **kwargs)
+            currentUser = Students.query.filter_by(
+                username=data['user']).first()
         except:
             pass
 
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'])
-            currentUser = Vendors.query.filter_by(username=data['user']).first()
-            return f(currentUser, *args, **kwargs)
+            currentUser = Vendors.query.filter_by(
+                username=data['user']).first()
         except:
             return make_response('Token is invaild!', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
@@ -69,7 +70,8 @@ def login():
         if(user.password == aut.password):  # if the passwords matach
             token = jwt.encode({
                 'user': aut.username,  # Tells who the user is
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)  # make it expire after 30 minutes
+                # make it expire after 30 minutes
+                #'exp': datetime.datetime.utcnow() + datetime.timedelta()
             }, app.config['SECRET_KEY'])
             return jsonify({'token': token.decode('UTF-8')})
     except:
@@ -86,7 +88,8 @@ def login():
     if(user.password == aut.password):  # if the passwords matach
         token = jwt.encode({
             'user': aut.username,  # Tells who the user is
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)  # make it expire after 30 minutes
+            # make it expire after 30 minutes
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
         }, app.config['SECRET_KEY'])
         return jsonify({'token': token.decode('UTF-8')})
         # return make_response
@@ -115,12 +118,58 @@ api.add_namespace(orders_api)
 
 @orders_api.route('/')
 class OrdersList(Resource):
-    # @orders_api.response(UserSchema(many=True))
-    @token_needed
+
+    @token_needed  # Get the all the past orders for that student
     def get(currentUser, self):
-        student = Students.query.first()
-        # return jsonify(student.as_dict())
-        return ''
+        return jsonify(currentUser.as_dict())
+        
+
+    # @token_needed  # Make the order for that student
+    # def post(currentUser, self):
+    def post(self):
+        data = request.get_json()
+        items = []
+        comps = []
+
+        newOrder = Orders()
+        newOrder.student = data['orderInfo'][0]['student']
+        newOrder.price = data['orderInfo'][0]['price']
+
+        #Make ites for the order
+        for i in range(0, data['orderInfo'][0]['items']):
+            # print(data['Item'+ str(i+1)][0]['name'])
+            item = Items()
+            itemlocation = 'Item'+ str(i+1)
+            print(itemlocation)
+
+            item.name = data[itemlocation][0]['name']
+            item.vendor = Vendors.query.filter_by(username = data['orderInfo'][0]['vendor']).first().id
+            
+            for j in range(0, data[itemlocation][0]['numComps']):
+                print(j)
+                comp = Components.query.filter_by(name= data['Item'+ str(i+1)][0]['comps'][0]['comp' + str(j+1)]).first()
+                comps.append(comp)
+
+            item.components = comps 
+            items.append(item)
+
+            db.session.add(item)
+            db.session.commit()
+        
+        newOrder.items = items
+        db.session.add(newOrder)
+        db.session.commit()
+
+        for c in comps:
+            c.stock -=1
+            db.session.commit()
+            
+
+
+        # for items
+
+        print(data['Item1'][0]['numComps'])
+        return data['Item1']
 
 
 @orders_api.route('/<int:user_id>')
@@ -147,17 +196,19 @@ def makeVendors():
     #     db.session.commit()
     #     return "Hi"
 
-    # @app.route('/post_user', methods=['GET', 'POST'])
-    # def post_user():
-    #     user = Users('test', 'test@mail')  # make object
-    #     db.session.add(user)  # save to database
-    #     db.session.commit()
-    #     return "Hi"
+@app.route('/post_user', methods=['GET', 'POST'])
+def post_user():
+    user = Students('jevans116', 'test@mail', 'password', 'Joel', 'Evas')  # make object
+    user.decliningBal = 400
+    user.mealSwipes = 50
+    db.session.add(user)  # save to database
+    db.session.commit()
+    return "Hi"
 
 
 @app.route('/burgerStudio/comp')
 def makeComponents():
-    vendor = Vendors.query.filter_by(s='Burger Studio').first()
+    vendor = Vendors.query.filter_by(username='BurgerStudio').first()
 
     # Buns
     whiteBun = Components('White Bun', vendor.id, 100, 0)

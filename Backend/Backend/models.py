@@ -1,4 +1,6 @@
+import datetime
 from app import db
+
 
 '''
     Objects that needed to made:
@@ -31,10 +33,12 @@ class Students(db.Model):
     # Need a one to many realtionship of Dev Questions
     '''
 
-    def __init__(self, username, email, password):
+    def __init__(self, username, email, password, firstName, lastName):
         self.username = username
         self.email = email
         self.password = password
+        self.firstName = firstName
+        self.lastName = lastName
 
     def __reper__(self):
         return '<User %r>' % self.username
@@ -79,17 +83,19 @@ class Vendors(db.Model):
 
 # Many to Many realtionship between Meals and Items
 orderMeals = db.Table('orderMeals',
+                      db.Column('id', db.Integer, primary_key = True),
                       db.Column('orderID', db.Integer, db.ForeignKey(
-                          'orders.id'), primary_key=True),
+                          'orders.id')),
                       db.Column('mealID', db.Integer, db.ForeignKey(
-                          'meal.id'), primary_key=True),
+                          'meal.id')),
                       )
 
 orderItems = db.Table('orderItems',
+                      db.Column('id', db.Integer, primary_key = True),
                       db.Column('orderID', db.Integer, db.ForeignKey(
-                          'orders.id'), primary_key=True),
+                          'orders.id')),
                       db.Column('itemID', db.Integer, db.ForeignKey(
-                          'items.id'), primary_key=True)
+                          'items.id'))
                       )
 
 
@@ -98,6 +104,7 @@ class Orders(db.Model):
     student = db.Column(db.Integer, db.ForeignKey(
         'students.id'), nullable=False)
     price = db.Column(db.Float)
+    timeStamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     meals = db.relationship('Meal', secondary=orderMeals,
                             lazy='subquery', backref=db.backref('orders', lazy=True))
     items = db.relationship('Items', secondary=orderItems,
@@ -109,18 +116,20 @@ class Orders(db.Model):
 
 # Many to Many realtionship between Meals and Items
 mealItems = db.Table('mealItems',
+                     db.Column('id', db.Integer, primary_key = True),
                      db.Column('mealID', db.Integer, db.ForeignKey(
-                         'meal.id'), primary_key=True),
+                         'meal.id')),
                      db.Column('itemID', db.Integer, db.ForeignKey(
-                         'items.id'), primary_key=True)
+                         'items.id'))
 
                      )
 
 mealComponents = db.Table('mealComponents',
+                          db.Column('id', db.Integer, primary_key = True),
                           db.Column('componentsID', db.Integer, db.ForeignKey(
-                              'components.id'), primary_key=True),
+                              'components.id')),
                           db.Column('mealID', db.Integer, db.ForeignKey(
-                              'meal.id'), primary_key=True),
+                              'meal.id')),
 
                           )
 
@@ -145,10 +154,11 @@ class Meal(db.Model):
 
 # Many to Many realtionship between Meals and Items
 itemComponents = db.Table('itemComponents',
+                          db.Column('id', db.Integer, primary_key = True),
                           db.Column('componentsID', db.Integer, db.ForeignKey(
-                              'components.id'), primary_key=True),
+                              'components.id')),
                           db.Column('itemID', db.Integer, db.ForeignKey(
-                              'items.id'), primary_key=True)
+                              'items.id'))
 
                           )
 
@@ -157,7 +167,6 @@ class Items(db.Model):  # EX buns, paty, etc
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
     vendor = db.Column(db.Integer, db.ForeignKey('vendors.id'), nullable=False)
-    stock = db.Column(db.Integer)
     description = db.Column(db.String(200))
     price = db.Column(db.Float)
     components = db.relationship('Components', secondary=itemComponents, lazy='subquery',
