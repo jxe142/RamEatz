@@ -1,13 +1,15 @@
 from flask import Flask, jsonify, request, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
-from flask import request, redirect
+from flask import request, redirect, Response
 from flask_restplus import Api, Resource, Namespace
 from functools import wraps
+import jsonpickle
 import os
 import json
 import jwt
 import datetime
+
 
 
 #==============================================================
@@ -115,13 +117,67 @@ def try2(currentUser):
 orders_api = Namespace('orders')
 api.add_namespace(orders_api)
 
+@app.route('/quick', methods=['GET', 'POST'])
+def quick():
+    print(request.get_json)
+    return ''
+
 
 @orders_api.route('/')
 class OrdersList(Resource):
 
-    @token_needed  # Get the all the past orders for that student
-    def get(currentUser, self):
-        return jsonify(currentUser.as_dict())
+    # @token_needed  # Get the all the past orders for that student
+    def get(self):
+        # myOrders = Orders.
+        user = request.headers['id']
+        jSon = '{'
+        count = 1 
+
+        myOrders = Orders.query.order_by(Orders.timeStamp.desc()).all()
+
+        for order in myOrders:
+            jSon += ' "order'+str(count)+ '": ['
+            jSon += json.dumps(order.as_dict(),sort_keys=True, default=str)
+            jSon = jSon[:-1] + ','
+
+
+            items = order.items
+            icount = 1
+            for i in items:
+                jSon += '"item'+str(icount)+'": ['
+                jSon += json.dumps(i.as_dict(), sort_keys=True, default=str)
+                jSon = jSon[:-1] + ', "comps": [{'
+                
+                comps = i.components
+                ccount = 1
+                for c in comps:
+                    jSon += '"comp'+str(ccount)+'": ['
+                    jSon += json.dumps(c.as_dict(), sort_keys=True, default=str)
+                    ccount += 1
+                    if(ccount != len(comps)+1):
+                        jSon += '],'
+                    else:
+                        jSon += ']}]}'
+
+                icount += 1
+                if(icount != len(items)+1):
+                    jSon += '],'
+                else:
+                    jSon += ']'
+
+        
+            count += 1
+            if(count != len(myOrders)+1):
+                jSon += '}],'
+            else:
+                jSon += '}]'
+                
+
+        jSon += '}'
+
+        jSon.replace('"\"', "")
+        print(jSon)
+        return Response(jSon,  mimetype='application/json')
         
 
     # @token_needed  # Make the order for that student
@@ -132,6 +188,14 @@ class OrdersList(Resource):
         comps = []
 
         newOrder = Orders()
+
+        num = random.randint(1, 10000000)
+        newOrder.confirm = int(num)
+
+        while(Orders.query.filter_by(confirm=num).first()):
+            num = random.randint
+            newOrder.confirm = int(num)
+
         newOrder.student = data['orderInfo'][0]['student']
         newOrder.price = data['orderInfo'][0]['price']
 
@@ -172,14 +236,116 @@ class OrdersList(Resource):
         return data['Item1']
 
 
-@orders_api.route('/<int:user_id>')
+@orders_api.route('/<int:order_id>')
 # @orders_api.resolve_object('user', lambda kwargs: User.query.get_or_404(kwargs.pop('user_id')))
 class ordersByID(Resource):
 
-    # @users_api.response(UserSchema())
-    def get(self, user):
-        return user
+     # @token_needed  # Make the order for that student
+    # def post(currentUser, self):
+    def get(self, order_id):
+        count = 1
+        jSon = '{'
 
+        try:
+            order = Orders.query.filter_by(id=order_id).first()
+        except: 
+            return make_response('Order does not exist!', 404)
+
+
+        jSon += ' "order": ['
+        jSon += json.dumps(order.as_dict(),sort_keys=True, default=str)
+        jSon = jSon[:-1] + ','
+
+
+        items = order.items
+        icount = 1
+        for i in items:
+            jSon += '"item'+str(icount)+'": ['
+            jSon += json.dumps(i.as_dict(), sort_keys=True, default=str)
+            jSon = jSon[:-1] + ', "comps": [{'
+            
+            comps = i.components
+            ccount = 1
+            for c in comps:
+                jSon += '"comp'+str(ccount)+'": ['
+                jSon += json.dumps(c.as_dict(), sort_keys=True, default=str)
+                ccount += 1
+                if(ccount != len(comps)+1):
+                    jSon += '],'
+                else:
+                    jSon += ']}]}'
+
+            icount += 1
+            if(icount != len(items)+1):
+                jSon += ']'
+            else:
+                jSon += ']'
+
+            if count == 1:
+                jSon += '}],'
+                count += 1
+        jSon += '}'
+        return Response(jSon,  mimetype='application/json')
+
+
+    def delete(self, order_id):
+        try:
+            order = Orders.query.filter_by(id=order_id).first()
+            orderId = order.id
+            db.session.delete(order)
+            db.session.commit()
+        except:
+            return make_response('Order does not exist!', 404)
+        return orderId
+
+    def put(self, order_id):
+        
+        try:
+            order = Orders.query.filter_by(id=order_id).first()
+        except:
+            return make_response('Order does not exist!', 404)
+
+
+        if(request.form.get('fav') == 'True' ):
+            order.isFav = True
+            db.session.add(order)
+            db.session.commit()
+            return make_response('Order add to favs', 200)
+        
+
+        try:
+            id = request.form.get('student')
+            student = Students.query.filter_by(id=id).first()
+        except:
+            return make_response('Student does not exist!', 404)
+
+        if(request.form.get('confirm') == 'True'):
+            #if the order ahs already been confirm
+            if order.isConfirm == True:
+                return make_response('Order has already be confirmed!', 404)
+            
+            #if the student gives the wrong confromation number for the order
+            elif order.confirm != int(request.form.get('confirmNumber')):
+                return make_response('Invalid conformation number!', 404)
+            
+            #everthing works the way it should
+            else:
+                order.isConfirm = True
+                if(student.decliningBal < order.price):
+                    return make_response('You do not have enough money in your account!', 500)
+                else:
+                    student.decliningBal = student.decliningBal - order.price
+                    db.session.add(order)
+                    db.session.add(student)
+                    db.session.commit()
+                    return make_response('Order Confirmed!', 200)
+                    
+        return make_response('Error', 500)
+        
+
+            
+            
+            
 
 @app.route('/burgerStudio')
 def makeVendors():
@@ -209,6 +375,8 @@ def post_user():
 @app.route('/burgerStudio/comp')
 def makeComponents():
     vendor = Vendors.query.filter_by(username='BurgerStudio').first()
+
+    
 
     # Buns
     whiteBun = Components('White Bun', vendor.id, 100, 0)

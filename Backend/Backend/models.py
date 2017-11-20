@@ -1,5 +1,6 @@
 import datetime
 from app import db
+import random 
 
 
 '''
@@ -99,12 +100,15 @@ orderItems = db.Table('orderItems',
                       )
 
 
-class Orders(db.Model):
+class Orders(db.Model, object):
     id = db.Column(db.Integer, primary_key=True)
     student = db.Column(db.Integer, db.ForeignKey(
         'students.id'), nullable=False)
     price = db.Column(db.Float)
-    timeStamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    confirm = db.Column(db.Integer, unique=True) #write the logic to get the order
+    isFav = db.Column(db.Boolean, default=False)
+    isConfirm = db.Column(db.Boolean, default=False) 
+    timeStamp = db.Column(db.DateTime, default=datetime.datetime.utcnow, index=True)
     meals = db.relationship('Meal', secondary=orderMeals,
                             lazy='subquery', backref=db.backref('orders', lazy=True))
     items = db.relationship('Items', secondary=orderItems,
@@ -112,6 +116,8 @@ class Orders(db.Model):
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+        
 
 
 # Many to Many realtionship between Meals and Items
