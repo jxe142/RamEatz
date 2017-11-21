@@ -1,31 +1,13 @@
 <ion-header>
-  <ion-navbar color='danger'>
+  <ion-navbar>
     <ion-title>Home</ion-title>
-    <!--Buts the button at the end and makes and icon button -->
-    <ion-buttons end>
-      <button ion-button icon-only (click)="navToAddItemPage()">
-        <ion-icon name='add'></ion-icon>
-      </button>
-
-    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  <ion-list>
-    <!--The NgFor allows us to look through the list and display them items -->
-    <!-- Detail push sends us to that page and passes the item you pressed as a paramter -->
-    <ion-item class="text" *ngFor="let item of itemList | async" detail-push navPush="EditItemPage" [navParams]="{item: item}">
-      <!-- (click)='selectItem(object) -->
-      <h2>Item Name: {{item.itemName}}</h2>
-      <h3>Amount: {{item.itemNumber}}</h3>
+  <ion-list inset>
+    <ion-item>
+      <p>{{data | json}}</p>
     </ion-item>
   </ion-list>
-
-  <button ion-button icon-only (click)="navToLoginItemPage()">
-    Log In
-  </button>
-
-
-
 </ion-content>
