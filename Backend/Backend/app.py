@@ -1,12 +1,15 @@
 from flask import Flask, jsonify, request, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
-from flask import request, redirect
+from flask import request, redirect, Response
 from flask_restplus import Api, Resource, Namespace
 from functools import wraps
+import jsonpickle
 import os
+import json
 import jwt
 import datetime
+
 
 
 #==============================================================
@@ -36,21 +39,21 @@ def token_needed(f):
             token = request.headers['token']
 
         if not token:
-            return jsonify({'message': 'Token is missing'}), 401
+            return make_response('No token provided!', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
         # see if token is vaild
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'])
-            currentUser = Students.query.filter_by(username=data['user']).first()
-            return f(currentUser, *args, **kwargs)
+            currentUser = Students.query.filter_by(
+                username=data['user']).first()
         except:
             pass
 
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'])
-            currentUser = Vendors.query.filter_by(username=data['user']).first()
-            return f(currentUser, *args, **kwargs)
+            currentUser = Vendors.query.filter_by(
+                username=data['user']).first()
         except:
-            return jsonify({'message': 'Token is invalid'}), 401
+            return make_response('Token is invaild!', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
         return f(currentUser, *args, **kwargs)
 
@@ -69,7 +72,8 @@ def login():
         if(user.password == aut.password):  # if the passwords matach
             token = jwt.encode({
                 'user': aut.username,  # Tells who the user is
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)  # make it expire after 30 minutes
+                # make it expire after 30 minutes
+                #'exp': datetime.datetime.utcnow() + datetime.timedelta()
             }, app.config['SECRET_KEY'])
             return jsonify({'token': token.decode('UTF-8')})
     except:
@@ -86,7 +90,8 @@ def login():
     if(user.password == aut.password):  # if the passwords matach
         token = jwt.encode({
             'user': aut.username,  # Tells who the user is
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)  # make it expire after 30 minutes
+            # make it expire after 30 minutes
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
         }, app.config['SECRET_KEY'])
         return jsonify({'token': token.decode('UTF-8')})
         # return make_response
@@ -94,6 +99,7 @@ def login():
         return make_response('Could not verify!!!', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
 
+# These are test to make sure that the token auth works
 @app.route('/hello')
 def tryFunctions():
     return jsonify({'message': 'anyone can see'})
@@ -111,23 +117,430 @@ def try2(currentUser):
 orders_api = Namespace('orders')
 api.add_namespace(orders_api)
 
+@app.route('/quick', methods=['GET', 'POST'])
+def quick():
+    print(request.get_json)
+    return ''
+
 
 @orders_api.route('/')
 class OrdersList(Resource):
-    @auth.login_required
-    # @orders_api.response(UserSchema(many=True))
+
+    # @token_needed  # Get the all the past orders for that student
     def get(self):
-        student = Students.query.first()
-        return student.as_dict()
+        # myOrders = Orders.
+        user = request.headers['id']
+        jSon = '{'
+        count = 1 
+
+        myOrders = Orders.query.order_by(Orders.timeStamp.desc()).all()
+
+        for order in myOrders:
+            jSon += ' "order'+str(count)+ '": ['
+            jSon += json.dumps(order.as_dict(),sort_keys=True, default=str)
+            jSon = jSon[:-1] + ','
 
 
-@orders_api.route('/<int:user_id>')
+            items = order.items
+            icount = 1
+            for i in items:
+                jSon += '"item'+str(icount)+'": ['
+                jSon += json.dumps(i.as_dict(), sort_keys=True, default=str)
+                jSon = jSon[:-1] + ', "comps": [{'
+                
+                comps = i.components
+                ccount = 1
+                for c in comps:
+                    jSon += '"comp'+str(ccount)+'": ['
+                    jSon += json.dumps(c.as_dict(), sort_keys=True, default=str)
+                    ccount += 1
+                    if(ccount != len(comps)+1):
+                        jSon += '],'
+                    else:
+                        jSon += ']}]}'
+
+                icount += 1
+                if(icount != len(items)+1):
+                    jSon += '],'
+                else:
+                    jSon += ']'
+
+        
+            count += 1
+            if(count != len(myOrders)+1):
+                jSon += '}],'
+            else:
+                jSon += '}]'
+                
+
+        jSon += '}'
+
+        jSon.replace('"\"', "")
+        print(jSon)
+        return Response(jSon,  mimetype='application/json')
+        
+
+    # @token_needed  # Make the order for that student
+    # def post(currentUser, self):
+    def post(self):
+        data = request.get_json()
+        items = []
+        comps = []
+
+        newOrder = Orders()
+
+        num = random.randint(1, 10000000)
+        newOrder.confirm = int(num)
+
+        while(Orders.query.filter_by(confirm=num).first()):
+            num = random.randint
+            newOrder.confirm = int(num)
+
+        newOrder.student = data['orderInfo'][0]['student']
+        newOrder.price = data['orderInfo'][0]['price']
+
+        #Make ites for the order
+        for i in range(0, data['orderInfo'][0]['items']):
+            # print(data['Item'+ str(i+1)][0]['name'])
+            item = Items()
+            itemlocation = 'Item'+ str(i+1)
+            print(itemlocation)
+
+            item.name = data[itemlocation][0]['name']
+            item.vendor = Vendors.query.filter_by(username = data['orderInfo'][0]['vendor']).first().id
+            
+            for j in range(0, data[itemlocation][0]['numComps']):
+                print(j)
+                comp = Components.query.filter_by(name= data['Item'+ str(i+1)][0]['comps'][0]['comp' + str(j+1)]).first()
+                comps.append(comp)
+
+            item.components = comps 
+            items.append(item)
+
+            db.session.add(item)
+            db.session.commit()
+        
+        newOrder.items = items
+        db.session.add(newOrder)
+        db.session.commit()
+
+        for c in comps:
+            c.stock -=1
+            db.session.commit()
+            
+
+
+        # for items
+
+        print(data['Item1'][0]['numComps'])
+        return data['Item1']
+
+
+@orders_api.route('/<int:order_id>')
 # @orders_api.resolve_object('user', lambda kwargs: User.query.get_or_404(kwargs.pop('user_id')))
 class ordersByID(Resource):
 
-    # @users_api.response(UserSchema())
-    def get(self, user):
-        return user
+     # @token_needed  # Make the order for that student
+    # def post(currentUser, self):
+    def get(self, order_id):
+        count = 1
+        jSon = '{'
+
+        try:
+            order = Orders.query.filter_by(id=order_id).first()
+        except: 
+            return make_response('Order does not exist!', 404)
+
+
+        jSon += ' "order": ['
+        jSon += json.dumps(order.as_dict(),sort_keys=True, default=str)
+        jSon = jSon[:-1] + ','
+
+
+        items = order.items
+        icount = 1
+        for i in items:
+            jSon += '"item'+str(icount)+'": ['
+            jSon += json.dumps(i.as_dict(), sort_keys=True, default=str)
+            jSon = jSon[:-1] + ', "comps": [{'
+            
+            comps = i.components
+            ccount = 1
+            for c in comps:
+                jSon += '"comp'+str(ccount)+'": ['
+                jSon += json.dumps(c.as_dict(), sort_keys=True, default=str)
+                ccount += 1
+                if(ccount != len(comps)+1):
+                    jSon += '],'
+                else:
+                    jSon += ']}]}'
+
+            icount += 1
+            if(icount != len(items)+1):
+                jSon += ']'
+            else:
+                jSon += ']'
+
+            if count == 1:
+                jSon += '}],'
+                count += 1
+        jSon += '}'
+        return Response(jSon,  mimetype='application/json')
+
+
+    def delete(self, order_id):
+        try:
+            order = Orders.query.filter_by(id=order_id).first()
+            orderId = order.id
+            db.session.delete(order)
+            db.session.commit()
+        except:
+            return make_response('Order does not exist!', 404)
+        return orderId
+
+    def put(self, order_id):
+        
+        try:
+            order = Orders.query.filter_by(id=order_id).first()
+        except:
+            return make_response('Order does not exist!', 404)
+
+
+        if(request.form.get('fav') == 'True' ):
+            order.isFav = True
+            db.session.add(order)
+            db.session.commit()
+            return make_response('Order add to favs', 200)
+        
+
+        try:
+            id = request.form.get('student')
+            student = Students.query.filter_by(id=id).first()
+        except:
+            return make_response('Student does not exist!', 404)
+
+        if(request.form.get('confirm') == 'True'):
+            #if the order ahs already been confirm
+            if order.isConfirm == True:
+                return make_response('Order has already be confirmed!', 404)
+            
+            #if the student gives the wrong confromation number for the order
+            elif order.confirm != int(request.form.get('confirmNumber')):
+                return make_response('Invalid conformation number!', 404)
+            
+            #everthing works the way it should
+            else:
+                order.isConfirm = True
+                if(student.decliningBal < order.price):
+                    return make_response('You do not have enough money in your account!', 500)
+                else:
+                    student.decliningBal = student.decliningBal - order.price
+                    db.session.add(order)
+                    db.session.add(student)
+                    db.session.commit()
+                    return make_response('Order Confirmed!', 200)
+
+        
+        #implemnt moving the order to the in progress queue
+
+
+        #implemnt moving the order to the complted queue this should trigger a notifaction to student
+                    
+        return make_response('Error', 500)
+        
+#==============================================================
+# Making Name spaces for the APIS Users
+#==============================================================
+student_api = Namespace('students')
+api.add_namespace(student_api)
+
+@student_api.route('/<int:student_id>')
+class Student(Resource):
+    
+    def get(self, student_id):
+        try:
+            student = (Students.query.filter_by(id=student_id).first().as_dict())
+        except:
+            return make_response ('Student does not exist!', 404)
+
+
+        return student
+
+
+#==============================================================
+# Making Name spaces for the APIS Componets
+#==============================================================
+
+#NOTE ITEMS ARE MAD ON THE FRONT END SIDE OF THE APP SO WHEN A USER WANTS
+#TO ADD NEW ITEMS ON THE NEUS THEY DO IT IN THE FRONT END MODELS
+#THIS WAY THE STUDNET FRONT END IS UPDATED WITH THAT NEW MODULE
+
+comps_api = Namespace('comps')
+api.add_namespace(comps_api)
+
+@comps_api.route('/')
+class Comps(Resource):
+    
+    #Returns all that vendors items
+    #params include the id for the vendor to get htier itesm
+    def get(self):
+        myList = []
+
+        try:
+            vendor = request.headers.get('vendor')
+            myComps = Components.query.filter_by(vendor=vendor).all()
+        except:
+            return make_response ('Student does not exist!', 404)
+
+        for c in myComps:
+           myList.append(c.as_dict())
+
+        return jsonify(myList)
+
+    #Api to make an item
+    def post(self):
+        
+
+        description = request.form.get('description')
+        name = request.form.get('name')
+        price = request.form.get('price')
+        stock = request.form.get('stock')
+        vendor = request.headers.get('vendor')
+
+        if(description and name and price and stock and vendor):
+            currentComp = Components(name, vendor, stock, price)
+            db.session.add(currentComp)
+            db.session.commit()
+        else:
+            return make_response('Please provide all the elements needed to make a Component!', 404 )
+
+        return jsonify(currentComp.as_dict())
+
+    
+    #delete all the vendors items
+    def delete(self):
+        pass
+
+@comps_api.route('/<int:comp_id>')
+# @orders_api.resolve_object('user', lambda kwargs: User.query.get_or_404(kwargs.pop('user_id')))
+class ordersByID(Resource):
+    
+    def get(self, comp_id):
+        try:
+            comp = Components.query.filter_by(id=comp_id).first()
+        
+        except:
+            return make_response('Component does not exist!', 404)
+    
+        return jsonify(comp.as_dict())
+
+
+    def delete(self, comp_id):
+        try:
+            comp = Components.query.filter_by(id=comp_id).first()
+            db.session.delete(comp)
+            db.session.commit()
+        
+        except:
+            return make_response('Component does not exist!', 404)
+    
+
+        return jsonify(comp.as_dict())
+
+    
+    #will use a from in the body that has the info we want
+    #This updates the item for any changes realted to it
+    def put(self, comp_id):
+        try:
+            comp = Components.query.filter_by(id=comp_id).first() 
+
+        except:
+            return make_response('Component does not exist!', 404)
+
+        name = request.form.get('name')
+        if(name):
+            comp.name = name
+
+        desp = request.form.get('description')
+        if(desp):
+            comp.description = desp
+
+        price = request.form.get('price')
+        if(price):
+            comp.price = price
+
+        stock = request.form.get('stock')
+        if(stock):
+            comp.stock = stock
+
+
+        db.session.add(comp)
+        db.session.commit()
+
+        return jsonify(comp.as_dict())
+
+
+cooking_api = Namespace('cooking')
+api.add_namespace(cooking_api)
+
+@cooking_api.route('/')
+class Cooking(Resource):
+    
+    #get all the orders that have not been cooked yet
+    #get the orders that the cook has ever worked on
+    def get(self):
+    
+
+#to get detail infor about the order you are working on jsut use the order api
+
+#remove is implemtn with orders as well
+
+
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @app.route('/burgerStudio')
@@ -145,17 +558,21 @@ def makeVendors():
     #     db.session.commit()
     #     return "Hi"
 
-    # @app.route('/post_user', methods=['GET', 'POST'])
-    # def post_user():
-    #     user = Users('test', 'test@mail')  # make object
-    #     db.session.add(user)  # save to database
-    #     db.session.commit()
-    #     return "Hi"
+@app.route('/post_user', methods=['GET', 'POST'])
+def post_user():
+    user = Students('jevans116', 'test@mail', 'password', 'Joel', 'Evas')  # make object
+    user.decliningBal = 400
+    user.mealSwipes = 50
+    db.session.add(user)  # save to database
+    db.session.commit()
+    return "Hi"
 
 
 @app.route('/burgerStudio/comp')
 def makeComponents():
-    vendor = Vendors.query.filter_by(s='Burger Studio').first()
+    vendor = Vendors.query.filter_by(username='BurgerStudio').first()
+
+    
 
     # Buns
     whiteBun = Components('White Bun', vendor.id, 100, 0)

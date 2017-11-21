@@ -1,4 +1,7 @@
+import datetime
 from app import db
+import random 
+
 
 '''
     Objects that needed to made:
@@ -31,10 +34,12 @@ class Students(db.Model):
     # Need a one to many realtionship of Dev Questions
     '''
 
-    def __init__(self, username, email, password):
+    def __init__(self, username, email, password, firstName, lastName):
         self.username = username
         self.email = email
         self.password = password
+        self.firstName = firstName
+        self.lastName = lastName
 
     def __reper__(self):
         return '<User %r>' % self.username
@@ -76,28 +81,59 @@ class Vendors(db.Model):
 
     '''
 
+class Cooks(db.Model):
+    # neeed to chagne this os it is a UUID
+    id = db.Column(db.Integer, primary_key=True)
+
+    username = db.Column(db.String(80), unique=True)
+    email = db.Column(db.String(120), unique=True)
+    password = db.Column(db.String(120))  # needs to be hashed
+    vendor = db.Column(db.Integer, db.ForeignKey('vendors.id'), nullable=False)
+
+    '''
+        *Needs a forigetn key to the meals that they choose to cook and not
+        what other cooks are making
+    '''
+
+    def __init__(self, username, email, password):
+        self.username = username
+        self.email = email
+        self.password = password
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # Many to Many realtionship between Meals and Items
 orderMeals = db.Table('orderMeals',
+                      db.Column('id', db.Integer, primary_key = True),
                       db.Column('orderID', db.Integer, db.ForeignKey(
-                          'orders.id'), primary_key=True),
+                          'orders.id')),
                       db.Column('mealID', db.Integer, db.ForeignKey(
-                          'meal.id'), primary_key=True),
+                          'meal.id')),
                       )
 
 orderItems = db.Table('orderItems',
+                      db.Column('id', db.Integer, primary_key = True),
                       db.Column('orderID', db.Integer, db.ForeignKey(
-                          'orders.id'), primary_key=True),
+                          'orders.id')),
                       db.Column('itemID', db.Integer, db.ForeignKey(
-                          'items.id'), primary_key=True)
+                          'items.id'))
                       )
 
 
-class Orders(db.Model):
+class Orders(db.Model, object):
     id = db.Column(db.Integer, primary_key=True)
     student = db.Column(db.Integer, db.ForeignKey(
         'students.id'), nullable=False)
+    cook = db.Column(db.Integer, db.ForeignKey('cook.id'))
+    inProgress = db.Column(db.Boolean, default=False)
+    isComplete = db.Column(db.Boolean, default=False)
     price = db.Column(db.Float)
+    confirm = db.Column(db.Integer, unique=True) #write the logic to get the order
+    isFav = db.Column(db.Boolean, default=False)
+    isConfirm = db.Column(db.Boolean, default=False) 
+    timeStamp = db.Column(db.DateTime, default=datetime.datetime.utcnow, index=True)
     meals = db.relationship('Meal', secondary=orderMeals,
                             lazy='subquery', backref=db.backref('orders', lazy=True))
     items = db.relationship('Items', secondary=orderItems,
@@ -106,21 +142,25 @@ class Orders(db.Model):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+        
+
 
 # Many to Many realtionship between Meals and Items
 mealItems = db.Table('mealItems',
+                     db.Column('id', db.Integer, primary_key = True),
                      db.Column('mealID', db.Integer, db.ForeignKey(
-                         'meal.id'), primary_key=True),
+                         'meal.id')),
                      db.Column('itemID', db.Integer, db.ForeignKey(
-                         'items.id'), primary_key=True)
+                         'items.id'))
 
                      )
 
 mealComponents = db.Table('mealComponents',
+                          db.Column('id', db.Integer, primary_key = True),
                           db.Column('componentsID', db.Integer, db.ForeignKey(
-                              'components.id'), primary_key=True),
+                              'components.id')),
                           db.Column('mealID', db.Integer, db.ForeignKey(
-                              'meal.id'), primary_key=True),
+                              'meal.id')),
 
                           )
 
@@ -145,10 +185,11 @@ class Meal(db.Model):
 
 # Many to Many realtionship between Meals and Items
 itemComponents = db.Table('itemComponents',
+                          db.Column('id', db.Integer, primary_key = True),
                           db.Column('componentsID', db.Integer, db.ForeignKey(
-                              'components.id'), primary_key=True),
+                              'components.id')),
                           db.Column('itemID', db.Integer, db.ForeignKey(
-                              'items.id'), primary_key=True)
+                              'items.id'))
 
                           )
 
@@ -157,7 +198,6 @@ class Items(db.Model):  # EX buns, paty, etc
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
     vendor = db.Column(db.Integer, db.ForeignKey('vendors.id'), nullable=False)
-    stock = db.Column(db.Integer)
     description = db.Column(db.String(200))
     price = db.Column(db.Float)
     components = db.relationship('Components', secondary=itemComponents, lazy='subquery',
@@ -183,30 +223,6 @@ class Components(db.Model):  # EX buns, paty, etc
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-# class Cooks(db.Model):
-#     # neeed to chagne this os it is a UUID
-#     id = db.Column(db.Integer, primary_key=True)
-
-#     username = db.Column(db.String(80), unique=True)
-#     email = db.Column(db.String(120), unique=True)
-#     password = db.Column(db.String(120))  # needs to be hashed
-
-#     '''
-#         *Needs a forigetn key to the meals that they choose to cook and not
-#         what other cooks are making
-#         *Needs a forigen key to the vendor they work for so can only see meals
-#         from that vendor
-#     '''
-
-#     def __init__(self, username, email, password):
-#         self.username = username
-#         self.email = email
-#         self.password = password
-
-#     def __reper__(self):
-#         return '<User %r>' % self.username
-
 
 # class Devs(db.Model):
 #     # neeed to chagne this os it is a UUID
