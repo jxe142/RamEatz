@@ -339,13 +339,209 @@ class ordersByID(Resource):
                     db.session.add(student)
                     db.session.commit()
                     return make_response('Order Confirmed!', 200)
+
+        
+        #implemnt moving the order to the in progress queue
+
+
+        #implemnt moving the order to the complted queue this should trigger a notifaction to student
                     
         return make_response('Error', 500)
         
+#==============================================================
+# Making Name spaces for the APIS Users
+#==============================================================
+student_api = Namespace('students')
+api.add_namespace(student_api)
 
+@student_api.route('/<int:student_id>')
+class Student(Resource):
+    
+    def get(self, student_id):
+        try:
+            student = (Students.query.filter_by(id=student_id).first().as_dict())
+        except:
+            return make_response ('Student does not exist!', 404)
+
+
+        return student
+
+
+#==============================================================
+# Making Name spaces for the APIS Componets
+#==============================================================
+
+#NOTE ITEMS ARE MAD ON THE FRONT END SIDE OF THE APP SO WHEN A USER WANTS
+#TO ADD NEW ITEMS ON THE NEUS THEY DO IT IN THE FRONT END MODELS
+#THIS WAY THE STUDNET FRONT END IS UPDATED WITH THAT NEW MODULE
+
+comps_api = Namespace('comps')
+api.add_namespace(comps_api)
+
+@comps_api.route('/')
+class Comps(Resource):
+    
+    #Returns all that vendors items
+    #params include the id for the vendor to get htier itesm
+    def get(self):
+        myList = []
+
+        try:
+            vendor = request.headers.get('vendor')
+            myComps = Components.query.filter_by(vendor=vendor).all()
+        except:
+            return make_response ('Student does not exist!', 404)
+
+        for c in myComps:
+           myList.append(c.as_dict())
+
+        return jsonify(myList)
+
+    #Api to make an item
+    def post(self):
+        
+
+        description = request.form.get('description')
+        name = request.form.get('name')
+        price = request.form.get('price')
+        stock = request.form.get('stock')
+        vendor = request.headers.get('vendor')
+
+        if(description and name and price and stock and vendor):
+            currentComp = Components(name, vendor, stock, price)
+            db.session.add(currentComp)
+            db.session.commit()
+        else:
+            return make_response('Please provide all the elements needed to make a Component!', 404 )
+
+        return jsonify(currentComp.as_dict())
+
+    
+    #delete all the vendors items
+    def delete(self):
+        pass
+
+@comps_api.route('/<int:comp_id>')
+# @orders_api.resolve_object('user', lambda kwargs: User.query.get_or_404(kwargs.pop('user_id')))
+class ordersByID(Resource):
+    
+    def get(self, comp_id):
+        try:
+            comp = Components.query.filter_by(id=comp_id).first()
+        
+        except:
+            return make_response('Component does not exist!', 404)
+    
+        return jsonify(comp.as_dict())
+
+
+    def delete(self, comp_id):
+        try:
+            comp = Components.query.filter_by(id=comp_id).first()
+            db.session.delete(comp)
+            db.session.commit()
+        
+        except:
+            return make_response('Component does not exist!', 404)
+    
+
+        return jsonify(comp.as_dict())
+
+    
+    #will use a from in the body that has the info we want
+    #This updates the item for any changes realted to it
+    def put(self, comp_id):
+        try:
+            comp = Components.query.filter_by(id=comp_id).first() 
+
+        except:
+            return make_response('Component does not exist!', 404)
+
+        name = request.form.get('name')
+        if(name):
+            comp.name = name
+
+        desp = request.form.get('description')
+        if(desp):
+            comp.description = desp
+
+        price = request.form.get('price')
+        if(price):
+            comp.price = price
+
+        stock = request.form.get('stock')
+        if(stock):
+            comp.stock = stock
+
+
+        db.session.add(comp)
+        db.session.commit()
+
+        return jsonify(comp.as_dict())
+
+
+cooking_api = Namespace('cooking')
+api.add_namespace(cooking_api)
+
+@cooking_api.route('/')
+class Cooking(Resource):
+    
+    #get all the orders that have not been cooked yet
+    #get the orders that the cook has ever worked on
+    def get(self):
+    
+
+#to get detail infor about the order you are working on jsut use the order api
+
+#remove is implemtn with orders as well
+
+
+
+        
             
-            
-            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @app.route('/burgerStudio')
 def makeVendors():

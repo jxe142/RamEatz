@@ -81,6 +81,28 @@ class Vendors(db.Model):
 
     '''
 
+class Cooks(db.Model):
+    # neeed to chagne this os it is a UUID
+    id = db.Column(db.Integer, primary_key=True)
+
+    username = db.Column(db.String(80), unique=True)
+    email = db.Column(db.String(120), unique=True)
+    password = db.Column(db.String(120))  # needs to be hashed
+    vendor = db.Column(db.Integer, db.ForeignKey('vendors.id'), nullable=False)
+
+    '''
+        *Needs a forigetn key to the meals that they choose to cook and not
+        what other cooks are making
+    '''
+
+    def __init__(self, username, email, password):
+        self.username = username
+        self.email = email
+        self.password = password
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # Many to Many realtionship between Meals and Items
 orderMeals = db.Table('orderMeals',
@@ -104,6 +126,9 @@ class Orders(db.Model, object):
     id = db.Column(db.Integer, primary_key=True)
     student = db.Column(db.Integer, db.ForeignKey(
         'students.id'), nullable=False)
+    cook = db.Column(db.Integer, db.ForeignKey('cook.id'))
+    inProgress = db.Column(db.Boolean, default=False)
+    isComplete = db.Column(db.Boolean, default=False)
     price = db.Column(db.Float)
     confirm = db.Column(db.Integer, unique=True) #write the logic to get the order
     isFav = db.Column(db.Boolean, default=False)
@@ -198,30 +223,6 @@ class Components(db.Model):  # EX buns, paty, etc
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-# class Cooks(db.Model):
-#     # neeed to chagne this os it is a UUID
-#     id = db.Column(db.Integer, primary_key=True)
-
-#     username = db.Column(db.String(80), unique=True)
-#     email = db.Column(db.String(120), unique=True)
-#     password = db.Column(db.String(120))  # needs to be hashed
-
-#     '''
-#         *Needs a forigetn key to the meals that they choose to cook and not
-#         what other cooks are making
-#         *Needs a forigen key to the vendor they work for so can only see meals
-#         from that vendor
-#     '''
-
-#     def __init__(self, username, email, password):
-#         self.username = username
-#         self.email = email
-#         self.password = password
-
-#     def __reper__(self):
-#         return '<User %r>' % self.username
-
 
 # class Devs(db.Model):
 #     # neeed to chagne this os it is a UUID
