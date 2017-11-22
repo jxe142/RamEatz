@@ -1,5 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HttpHeaders } from "@angular/common/http";
+// import { HttpHeaders } from '@angular/common/http/src/headers';
 
 /*
   Generated class for the RestProvider provider.
@@ -14,6 +16,22 @@ export class RestProvider {
   constructor(public http: HttpClient) {
     console.log('Hello RestProvider Provider');
   }
+
+  
+
+  getMItems(vendor) {
+    return new Promise(resolve => {
+      this.http.get(this.apiUrl + '/mItems/', {
+        headers: new HttpHeaders().set('vendor', vendor.toString()),
+      }).subscribe(data => {
+        resolve(data);
+      }, err => {
+        console.log(err);
+      });
+    });
+  }
+
+
 
   getUsers() {
     return new Promise(resolve => {

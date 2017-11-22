@@ -489,11 +489,61 @@ class Cooking(Resource):
     #get all the orders that have not been cooked yet
     #get the orders that the cook has ever worked on
     def get(self):
+        pass
     
 
 #to get detail infor about the order you are working on jsut use the order api
 
 #remove is implemtn with orders as well
+
+
+#==============================================================
+# Making Name spaces for the APIS Componets
+#==============================================================
+comps_api = Namespace('mItems')
+api.add_namespace(comps_api)
+
+@comps_api.route('/')
+class Comps(Resource):
+    
+    #Returns all that vendors items
+    #params include the id for the vendor to get htier itesm
+    def get(self):
+        myList = []
+
+        try:
+            vendor = request.headers.get('vendor')
+            myMItems = MeneuItems.query.filter_by(vendor=vendor).all()
+        except:
+            return make_response ('Student does not exist!', 404)
+
+        for c in myMItems:
+           print(c)
+           myList.append(c.as_dict())
+
+        return jsonify(myList)
+
+    #Api to make an item
+    def post(self):
+        
+
+        name = request.form.get('name')
+        price = request.form.get('price')
+        vendor = request.headers.get('vendor')
+
+        if(name and price and vendor):
+            currentComp = MeneuItems(vendor, price, name)
+            db.session.add(currentComp)
+            db.session.commit()
+        else:
+            return make_response('Please provide all the elements needed to make a Component!', 404 )
+
+        return jsonify(currentComp.as_dict())
+
+    
+    #delete all the vendors items
+    def delete(self):
+        pass
 
 
 
@@ -567,6 +617,47 @@ def post_user():
     db.session.commit()
     return "Hi"
 
+
+@app.route('/burgerStudio/items')
+def makeItems():
+    vendor = Vendors.query.filter_by(username='BurgerStudio').first()
+    print(vendor.id)
+
+    philly = MeneuItems(vendor.id,6.99, 'Philly Cheesesteak')
+    db.session.add(philly)
+
+    chickenSteak = MeneuItems(vendor.id,6.99, 'Chicken Cheesesteak')
+    db.session.add(chickenSteak)
+
+    burger = MeneuItems(vendor.id,5.99, 'Permium Burger')
+    db.session.add(burger)
+
+    dburger = MeneuItems(vendor.id,7.49, 'Double Premium Burger')
+    db.session.add(dburger)
+
+    veggie = MeneuItems(vendor.id,5.29, 'Veggie Burger')
+    db.session.add(veggie)
+
+    turkey = MeneuItems(vendor.id,4.69, 'Turkey Burger')
+    db.session.add(turkey)
+
+    sturkey = MeneuItems(vendor.id,5.89, 'Double Turkey Burger')
+    db.session.add(sturkey)
+
+    cChicken = MeneuItems(vendor.id,5.49, 'Crispy Chicken Sandwich')
+    db.session.add(cChicken)
+
+    gChicken = MeneuItems(vendor.id,5.59, 'Grilled Chicken Sandwich')
+    db.session.add(gChicken)
+
+    cTChicken = MeneuItems(vendor.id,5.49, 'Crispy Chicken Tenders')
+    db.session.add(cTChicken)
+
+    db.session.commit()
+
+    return vendor.username
+
+    
 
 @app.route('/burgerStudio/comp')
 def makeComponents():

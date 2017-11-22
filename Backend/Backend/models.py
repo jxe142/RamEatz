@@ -63,7 +63,7 @@ class Vendors(db.Model):
     storeName = db.Column(db.String(120), unique=True)
     items = db.relationship("Items", backref='vendorItems', lazy=True)
     components = db.relationship("Components", backref='vendorComponents', lazy=True)
-    meals = db.relationship("Meal", backref='vendorMeals', lazy=True)
+    meneuItems = db.relationship("MeneuItems", backref='vendorMeneuItems', lazy=True)
 
     def __init__(self, username, email, password, storeName):
         self.username = username
@@ -105,14 +105,6 @@ class Cooks(db.Model):
 
 
 # Many to Many realtionship between Meals and Items
-orderMeals = db.Table('orderMeals',
-                      db.Column('id', db.Integer, primary_key = True),
-                      db.Column('orderID', db.Integer, db.ForeignKey(
-                          'orders.id')),
-                      db.Column('mealID', db.Integer, db.ForeignKey(
-                          'meal.id')),
-                      )
-
 orderItems = db.Table('orderItems',
                       db.Column('id', db.Integer, primary_key = True),
                       db.Column('orderID', db.Integer, db.ForeignKey(
@@ -126,7 +118,7 @@ class Orders(db.Model, object):
     id = db.Column(db.Integer, primary_key=True)
     student = db.Column(db.Integer, db.ForeignKey(
         'students.id'), nullable=False)
-    cook = db.Column(db.Integer, db.ForeignKey('cook.id'))
+    cook = db.Column(db.Integer, db.ForeignKey('cooks.id'))
     inProgress = db.Column(db.Boolean, default=False)
     isComplete = db.Column(db.Boolean, default=False)
     price = db.Column(db.Float)
@@ -134,50 +126,25 @@ class Orders(db.Model, object):
     isFav = db.Column(db.Boolean, default=False)
     isConfirm = db.Column(db.Boolean, default=False) 
     timeStamp = db.Column(db.DateTime, default=datetime.datetime.utcnow, index=True)
-    meals = db.relationship('Meal', secondary=orderMeals,
-                            lazy='subquery', backref=db.backref('orders', lazy=True))
     items = db.relationship('Items', secondary=orderItems,
                             lazy='subquery', backref=db.backref('orders', lazy=True))
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-        
 
-
-# Many to Many realtionship between Meals and Items
-mealItems = db.Table('mealItems',
-                     db.Column('id', db.Integer, primary_key = True),
-                     db.Column('mealID', db.Integer, db.ForeignKey(
-                         'meal.id')),
-                     db.Column('itemID', db.Integer, db.ForeignKey(
-                         'items.id'))
-
-                     )
-
-mealComponents = db.Table('mealComponents',
-                          db.Column('id', db.Integer, primary_key = True),
-                          db.Column('componentsID', db.Integer, db.ForeignKey(
-                              'components.id')),
-                          db.Column('mealID', db.Integer, db.ForeignKey(
-                              'meal.id')),
-
-                          )
-
-
-class Meal(db.Model):
+class MeneuItems(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     vendor = db.Column(db.Integer, db.ForeignKey('vendors.id'), nullable=False)
     price = db.Column(db.Float)
-    items = db.relationship('Items', secondary=mealItems,
-                            lazy='subquery', backref=db.backref('meal', lazy=True))
-    components = db.relationship('Components', secondary=mealComponents,
-                                 lazy='subquery', backref=db.backref('items', lazy=True))
+    name = db.Column(db.String(120))
 
-    def __init__(self, vendor, price):
+    def __init__(self, vendor, price, name):
         self.vendor = vendor
         self.price = price
-
+        self.name = name
+    
+    
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
