@@ -31,6 +31,18 @@ export class RestProvider {
     });
   }
 
+  getComps(vendor) {
+    return new Promise(resolve => {
+      this.http.get(this.apiUrl + '/comps/', {
+        headers: new HttpHeaders().set('vendor', vendor.toString()),
+      }).subscribe(data => {
+        resolve(data);
+      }, err => {
+        console.log(err);
+      });
+    });
+  }
+
 
 
   getUsers() {

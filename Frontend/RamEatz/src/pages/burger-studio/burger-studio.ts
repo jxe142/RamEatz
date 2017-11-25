@@ -3,6 +3,7 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { RestProvider } from "../../providers/rest/rest";
 import { Observable } from 'rxjs/Observable'
 import { orderService } from "../../services/orderService/orderService";
+import { item } from "../../models/Orders_Items_Comps/items";
 
 /**
  * Generated class for the BurgerStudioPage page.
@@ -22,13 +23,20 @@ export class BurgerStudioPage {
   
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public rest: RestProvider,
-  orderSer: orderService) {
+  public orderSer: orderService) {
     this.getItems();
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad BurgerStudioPage');
   }
+
+  makeItem(item){  
+    console.log(item);
+    this.orderSer.makeItem(item);
+    this.navCtrl.setRoot("BurgerStudioBunsPage");
+  }
+
 
   getItems() {
     this.rest.getMItems(1)
@@ -44,5 +52,7 @@ export class BurgerStudioPage {
         }
       });
   }
+
+
 
 }

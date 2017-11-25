@@ -5,9 +5,9 @@ import { Observable } from 'rxjs/Observable'
 import { orderService } from "../../services/orderService/orderService";
 import { comp } from "../../models/Orders_Items_Comps/comps";
 import { TabsPage } from "../tabs/tabs";
-import { AlertController } from 'ionic-angular';
+
 /**
- * Generated class for the BurgerStudioCompsPage page.
+ * Generated class for the BurgerStudioBunsPage page.
  *
  * See https://ionicframework.com/docs/components/#navigation for more info on
  * Ionic pages and navigation.
@@ -15,17 +15,17 @@ import { AlertController } from 'ionic-angular';
 
 @IonicPage()
 @Component({
-  selector: 'page-burger-studio-comps',
-  templateUrl: 'burger-studio-comps.html',
+  selector: 'page-burger-studio-buns',
+  templateUrl: 'burger-studio-buns.html',
 })
-export class BurgerStudioCompsPage {
+export class BurgerStudioBunsPage {
 
   compList: Array<any> = [];  
   selected: Array<any> = [];
   
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public rest:RestProvider,
-  public orderSer:orderService, public alertCtrl: AlertController) {
+  public orderSer:orderService) {
     this.getComps();    
   }
 
@@ -48,64 +48,35 @@ export class BurgerStudioCompsPage {
           if (data.hasOwnProperty(item)) {
             const element = data[item];
             var name = String(element.name);
-            if(!name.includes('Bun') && !name.includes('bun') && !name.includes('Cheese') && !name.includes('cheese')){
+            if(name.includes('Bun') || name.includes('bun')){
+              console.log('BUNZZZ');
               this.compList.push({id:count, value: element}); 
               count++; 
-            }      
+            }                
           }
         }
       });
-  }
-
-  presentConfirm() {
-    let alert = this.alertCtrl.create({
-      title: 'Confirm adding to cart',
-      message: 'Do you want to add this item to your cart?',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => {
-            this.cancelOrder();
-          }
-        },
-        {
-          text: 'Buy',
-          handler: () => {
-            this.navCtrl.setRoot(TabsPage);
-            this.navCtrl.popToRoot();
-            console.log(this.orderSer.items.length);
-          }
-        }
-      ]
-    });
-    alert.present();
   }
 
   submitOrder(){
     for (var i=0; i < this.selected.length; i++) {
       if(this.selected[i] == true){
         console.log(i + " " + this.selected[i]);
-        this.orderSer.makeComp(this.compList[i].value);
-        // console.log(this.compList[i].value);        
+        this.orderSer.makeComp(this.compList[i].value);        
       }      
-    }
-
-    this.orderSer.makeComp('end');
-    this.presentConfirm();
-    
-    // this.navCtrl.push("BurgerStudioComboPage"); 
-    
-    
-    
+    }  
+    this.navCtrl.push("BurgerStudioCheesePage");  
   }
 
   
   cancelOrder(){
-    this.orderSer.items = [];
+    this.orderSer.items.pop(); 
+    this.orderSer.currentItem = this.orderSer.currentItem-1;
     console.log(this.orderSer.items.length);
-    this.navCtrl.setRoot("BurgerStudioPage");
     
+    this.navCtrl.setRoot(TabsPage);
+    this.navCtrl.popToRoot();  
   }
 
 }
+
