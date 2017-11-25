@@ -70,7 +70,7 @@ export class BurgerStudioCompsPage {
           }
         },
         {
-          text: 'Buy',
+          text: 'Confirm',
           handler: () => {
             this.navCtrl.setRoot(TabsPage);
             this.navCtrl.popToRoot();
@@ -102,9 +102,12 @@ export class BurgerStudioCompsPage {
 
   
   cancelOrder(){
-    this.orderSer.items = [];
+    this.orderSer.items.pop(); 
+    this.orderSer.currentItem = this.orderSer.currentItem-1;
     console.log(this.orderSer.items.length);
-    this.navCtrl.setRoot("BurgerStudioPage");
+    
+    this.navCtrl.setRoot(TabsPage);
+    this.navCtrl.popToRoot();  
     
   }
 

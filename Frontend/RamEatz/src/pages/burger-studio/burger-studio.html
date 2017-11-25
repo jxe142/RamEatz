@@ -16,7 +16,7 @@
 <ion-content padding>
     <ion-list inset>
         <ion-item class="text" *ngFor="let item of itemList" (click)="makeItem(item)" >
-          <p>{{item.name}}</p>
+            <ion-label>{{item.name}}</ion-label>
 
           <ion-note item-right>{{item.price}}</ion-note>          
         </ion-item>

@@ -34,7 +34,7 @@ export class BurgerStudioPage {
   makeItem(item){  
     console.log(item);
     this.orderSer.makeItem(item);
-    this.navCtrl.setRoot("BurgerStudioBunsPage");
+    this.navCtrl.push("BurgerStudioBunsPage");
   }
 
 

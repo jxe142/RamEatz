@@ -29,17 +29,6 @@ export class BurgerStudioBunsPage {
     this.getComps();    
   }
 
-
-
-  public notify(comp) {
-    console.log(comp); 
-  }
-
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad BurgerStudioCompsPage');
-    console.log(this.orderSer.items[0]);
-  }
-
   getComps() {
     this.rest.getComps(1)
       .then(data => {
@@ -49,22 +38,15 @@ export class BurgerStudioBunsPage {
             const element = data[item];
             var name = String(element.name);
             if(name.includes('Bun') || name.includes('bun')){
-              console.log('BUNZZZ');
-              this.compList.push({id:count, value: element}); 
-              count++; 
+              this.compList.push(element); 
             }                
           }
         }
       });
   }
 
-  submitOrder(){
-    for (var i=0; i < this.selected.length; i++) {
-      if(this.selected[i] == true){
-        console.log(i + " " + this.selected[i]);
-        this.orderSer.makeComp(this.compList[i].value);        
-      }      
-    }  
+  submitOrder(comp){
+    this.orderSer.makeComp(comp);  
     this.navCtrl.push("BurgerStudioCheesePage");  
   }
 

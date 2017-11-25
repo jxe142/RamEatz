@@ -17,11 +17,10 @@
 <ion-list inset>
     <ion-item *ngFor="let comp of compList">
         <ion-label>{{comp.value.name}}</ion-label>
-        <ion-checkbox color="danger" [(ngModel)]="selected[comp.id]"></ion-checkbox>    <!--(ionChange)="notify(comp)" -->    
+        <ion-toggle color="danger" [(ngModel)]="selected[comp.id]"></ion-toggle>    <!--(ionChange)="notify(comp)" -->    
     </ion-item>
   </ion-list>
 
-  {{selected | json }}  
-  <button ion-button (click)="cancelOrder()">Cancel</button>
-  <button ion-button (click)="submitOrder()">Submit</button>     
+  <button ion-button block color="secondary" (click)="submitOrder()">Submit</button>       
+  <button ion-button block color="danger" (click)="cancelOrder()">Cancel</button>
   </ion-content>

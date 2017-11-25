@@ -4,7 +4,12 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
-  <button ion-button (click)=navToBurgerStudioPage()>Burger Studio</button>  
+<ion-content padding>  
+  <ion-list>
+      <ion-item (click)=navToBurgerStudioPage()>
+        <ion-icon name="md-restaurant" item-start></ion-icon>
+          Burger Studio
+      </ion-item>
+    </ion-list>
 
 </ion-content>
