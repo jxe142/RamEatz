@@ -14,7 +14,7 @@
     
     
     <ion-content padding>
-    <ion-list inset>
+    <ion-list>
         <ion-item *ngFor="let comp of compList">
             <ion-label>{{comp.value.name}}</ion-label>
             <ion-toggle color="danger" [(ngModel)]="selected[comp.id]"></ion-toggle>    <!--(ionChange)="notify(comp)" -->    

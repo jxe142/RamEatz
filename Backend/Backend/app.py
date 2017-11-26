@@ -183,7 +183,7 @@ class OrdersList(Resource):
     # @token_needed  # Make the order for that student
     # def post(currentUser, self):
     def post(self):
-        data = request.get_json()
+        data = json.loads(request.get_json())
         items = []
         comps = []
 
@@ -196,22 +196,22 @@ class OrdersList(Resource):
             num = random.randint
             newOrder.confirm = int(num)
 
-        newOrder.student = data['orderInfo'][0]['student']
-        newOrder.price = data['orderInfo'][0]['price']
+        print(data)
+
+        newOrder.student = Students.query.filter_by(id=data["student"]).first().id
+        newOrder.price = data['total']
 
         #Make ites for the order
-        for i in range(0, data['orderInfo'][0]['items']):
-            # print(data['Item'+ str(i+1)][0]['name'])
-            item = Items()
-            itemlocation = 'Item'+ str(i+1)
-            print(itemlocation)
+        for i in data['items']:
+            print(i)
 
-            item.name = data[itemlocation][0]['name']
-            item.vendor = Vendors.query.filter_by(username = data['orderInfo'][0]['vendor']).first().id
+            item = Items()
+            item.name = i['name']
+            item.vendor = Vendors.query.filter_by(id = i['vendor']).first().id
             
-            for j in range(0, data[itemlocation][0]['numComps']):
+            for j in i['comps']:
                 print(j)
-                comp = Components.query.filter_by(name= data['Item'+ str(i+1)][0]['comps'][0]['comp' + str(j+1)]).first()
+                comp = Components.query.filter_by(name= j['name']).first()
                 comps.append(comp)
 
             item.components = comps 
@@ -232,8 +232,7 @@ class OrdersList(Resource):
 
         # for items
 
-        print(data['Item1'][0]['numComps'])
-        return data['Item1']
+        return ''
 
 
 @orders_api.route('/<int:order_id>')
