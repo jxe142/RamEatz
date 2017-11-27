@@ -60,7 +60,7 @@ export class LogInPage {
         this.user.swipes = userJson['mealSwipes']
 
         // this.navCtrl.push("HomePage")
-        this.navCtrl.setRoot(TabsPage,{})
+        this.navCtrl.setRoot(TabsPage)
         
       } 
       else {

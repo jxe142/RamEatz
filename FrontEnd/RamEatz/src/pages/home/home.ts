@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, MenuController } from 'ionic-angular';
 import { RestProvider } from "../../providers/rest/rest";
 import { Observable } from 'rxjs/Observable'
 
@@ -15,8 +15,16 @@ export class HomePage {
   username: string;
   
 
-  constructor(public navCtrl: NavController, public rest: RestProvider) {
+  constructor(public navCtrl: NavController, public rest: RestProvider, public menu: MenuController) {
     this.username = window.localStorage.getItem('username');
+    
+  }
+
+  ionViewDidLoad() {
+    console.log('ionViewDidLoad LogInPage');
+    this.menu.swipeEnable(true, 'left');
+    this.menu.enable(true, 'left');
+    
   }
 
   getUsers() {

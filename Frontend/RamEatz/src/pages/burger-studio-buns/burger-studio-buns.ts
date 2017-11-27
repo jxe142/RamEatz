@@ -32,7 +32,7 @@ export class BurgerStudioBunsPage {
     this.tabBarElement = document.querySelector('.tabbar.show-tabbar'); 
     
     }
-    
+
 
   getComps() {
     this.rest.getComps(1)
