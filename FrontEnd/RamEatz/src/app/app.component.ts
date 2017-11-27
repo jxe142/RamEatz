@@ -26,11 +26,8 @@ export class MyApp {
 
       this.rest.test(token).then(data => {
 
-        console.log(data);
-        
-
       if(data['status'] == 401){
-      
+        this.rootPage = "LogInPage";
       }
 
     });
