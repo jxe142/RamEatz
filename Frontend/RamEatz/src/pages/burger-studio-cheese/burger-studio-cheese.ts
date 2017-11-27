@@ -28,7 +28,7 @@ export class BurgerStudioCheesePage {
   public orderSer:orderService) {
     this.getComps();    
   }
-
+  
 
 
   public notify(comp) {

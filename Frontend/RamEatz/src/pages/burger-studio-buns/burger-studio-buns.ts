@@ -22,15 +22,17 @@ export class BurgerStudioBunsPage {
 
   compList: Array<any> = [];  
   selected: Array<any> = [];
+  tabBarElement: any;
+  
   
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public rest:RestProvider,
   public orderSer:orderService,) {
-    this.getComps(); 
+    this.getComps();
+    this.tabBarElement = document.querySelector('.tabbar.show-tabbar'); 
     
     }
-
-
+    
 
   getComps() {
     this.rest.getComps(1)

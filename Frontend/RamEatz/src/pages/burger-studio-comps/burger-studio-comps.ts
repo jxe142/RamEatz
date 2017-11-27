@@ -23,13 +23,12 @@ export class BurgerStudioCompsPage {
   compList: Array<any> = [];  
   selected: Array<any> = [];
   
+  
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public rest:RestProvider,
   public orderSer:orderService, public alertCtrl: AlertController) {
     this.getComps();    
   }
-
-
 
   public notify(comp) {
     console.log(comp); 

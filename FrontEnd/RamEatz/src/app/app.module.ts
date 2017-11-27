@@ -28,7 +28,9 @@ import { RestProvider } from '../providers/rest/rest';
   imports: [
     BrowserModule,
     HttpClientModule,
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp,{
+      tabsHideOnSubPages: true
+    })
   ],
   bootstrap: [IonicApp],
   entryComponents: [
