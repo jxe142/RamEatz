@@ -1,7 +1,13 @@
 <ion-header>
-  <ion-navbar>
+  <ion-navbar navbar color="danger">
+   <!-- <ion-buttons start>
+      <button ion-button icon-only menu-toggle="left">
+        <ion-icon name="menu"></ion-icon>
+      </button>
+    </ion-buttons> -->
     <ion-title>Home</ion-title>
   </ion-navbar>
+
 </ion-header>
 
 <ion-content padding>  
@@ -11,5 +17,8 @@
           Burger Studio
       </ion-item>
     </ion-list>
+
+    <button ion-button block color="danger" (click)="navToLogInPage()">Cancel</button>
+    
 
 </ion-content>

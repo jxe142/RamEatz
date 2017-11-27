@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { comp } from "../../models/Orders_Items_Comps/comps";
 import { item } from "../../models/Orders_Items_Comps/items";
+import { UserService } from "../userService/user";
 
 
 @Injectable()

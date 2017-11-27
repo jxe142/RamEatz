@@ -12,9 +12,11 @@ export class HomePage {
 
   data: any;
   itemList: Array<any> = [];
+  username: string;
   
 
   constructor(public navCtrl: NavController, public rest: RestProvider) {
+    this.username = window.localStorage.getItem('username');
   }
 
   getUsers() {
@@ -30,6 +32,13 @@ export class HomePage {
     //if use set root instead of push there would be no back button
     // console.log(window.localStorage.getItem('currentUser'));
     this.navCtrl.push("BurgerStudioPage");
+  }
+
+  navToLogInPage() {
+    //Navages the useres to the add Item page
+    //if use set root instead of push there would be no back button
+    // console.log(window.localStorage.getItem('currentUser'));
+    this.navCtrl.push("LogInPage"); 
   }
 
 }

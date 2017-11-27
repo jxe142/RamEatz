@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { HttpHeaders } from "@angular/common/http";
+import { HttpHeaderResponse } from '@angular/common/http/src/response';
 // import { HttpHeaders } from '@angular/common/http/src/headers';
 
 /*
@@ -31,6 +32,21 @@ export class RestProvider {
     });
   }
 
+
+  logIn(username,password){
+    btoa("username:temppass");
+    return new Promise(resolve => {
+      this.http.get(this.apiUrl + '/login', {
+        headers: new HttpHeaders().set("Authorization", "Basic " + btoa(username + ":" + password)), // "Content-Type", "application/x-www-form-urlencoded"
+      }).subscribe(data => {
+        resolve(data);
+      }, err => {
+        console.log(err);
+        resolve(err)
+      });
+    });
+  }
+
   getComps(vendor) {
     return new Promise(resolve => {
       this.http.get(this.apiUrl + '/comps/', {
@@ -41,6 +57,20 @@ export class RestProvider {
         console.log(err);
       });
     });
+  }
+
+  test(token){
+    return new Promise(resolve => {
+      this.http.get(this.apiUrl + '/helloPro', {
+        headers: new HttpHeaders().set("token", token), // "Content-Type", "application/x-www-form-urlencoded"
+      }).subscribe(data => {
+        resolve(data);
+      }, err => {
+        console.log(err);
+        resolve(err)
+      });
+    });
+
   }
 
 

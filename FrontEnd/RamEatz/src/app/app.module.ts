@@ -10,6 +10,7 @@ import { HomePage } from '../pages/home/home';
 import { TabsPage } from '../pages/tabs/tabs';
 
 import { orderService } from "../services/orderService/orderService";
+import { UserService } from "../services/userService/user";
 
 
 import { StatusBar } from '@ionic-native/status-bar';
@@ -43,6 +44,7 @@ import { RestProvider } from '../providers/rest/rest';
     { provide: ErrorHandler, useClass: IonicErrorHandler },
     RestProvider,
     orderService,
+    UserService
   ]
 })
 export class AppModule { }

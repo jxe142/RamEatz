@@ -1,1 +1,59 @@
-<ion-nav [root]="rootPage"></ion-nav>
+<ion-menu [content]="content">
+    <ion-header>
+        <ion-navbar navbar color="danger">
+                 <!-- <ion-buttons start>
+                    <button ion-button icon-only menu-toggle="left">
+                      <ion-icon name="menu"></ion-icon>
+                    </button>
+                  </ion-buttons> -->
+            <ion-title>Profile</ion-title>
+        </ion-navbar>
+    </ion-header>
+
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+
+    <ion-card>
+            <ion-card-header>
+              Explore Nearby
+            </ion-card-header>
+          
+            <ion-list>
+              <button ion-item>
+                <ion-icon name="cart" item-start></ion-icon>
+                Shopping
+              </button>
+          
+              <button ion-item>
+                <ion-icon name="medical" item-start></ion-icon>
+                Hospital
+              </button>
+          
+              <button ion-item>
+                <ion-icon name="cafe" item-start></ion-icon>
+                Cafe
+              </button>
+          
+              <button ion-item>
+                <ion-icon name="paw" item-start></ion-icon>
+                Dog Park
+              </button>
+          
+              <button ion-item>
+                <ion-icon name="beer" item-start></ion-icon>
+                Pub
+              </button>
+          
+              <button ion-item>
+                <ion-icon name="planet" item-start></ion-icon>
+                Space
+              </button>
+          
+            </ion-list>
+          </ion-card>
+</ion-menu>
+
+
+<ion-nav #content [root]="rootPage" ></ion-nav>

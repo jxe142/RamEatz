@@ -75,7 +75,9 @@ def login():
                 # make it expire after 30 minutes
                 #'exp': datetime.datetime.utcnow() + datetime.timedelta()
             }, app.config['SECRET_KEY'])
-            return jsonify({'token': token.decode('UTF-8')})
+
+            data = {'token': token.decode('UTF-8'), 'user': user.as_dict()}
+            return jsonify(data)
     except:
         pass
 
@@ -93,7 +95,9 @@ def login():
             # make it expire after 30 minutes
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
         }, app.config['SECRET_KEY'])
-        return jsonify({'token': token.decode('UTF-8')})
+
+        data = {'token': token.decode('UTF-8'), 'user': user.as_dict()}
+        return jsonify(data)
         # return make_response
 
         return make_response('Could not verify!!!', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
@@ -198,8 +202,12 @@ class OrdersList(Resource):
 
         print(data)
 
-        newOrder.student = Students.query.filter_by(id=data["student"]).first().id
-        newOrder.price = data['total']
+        currentStudent = Students.query.filter_by(id=data["student"]).first()
+        orderPrice = data['total']
+        currentStudent.decliningBal = currentStudent.decliningBal - orderPrice
+        db.session.add(currentStudent)
+        newOrder.student = currentStudent.id
+        newOrder.price = orderPrice
 
         #Make ites for the order
         for i in data['items']:
