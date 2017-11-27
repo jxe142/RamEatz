@@ -25,9 +25,12 @@ export class BurgerStudioBunsPage {
   
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public rest:RestProvider,
-  public orderSer:orderService) {
-    this.getComps();    
-  }
+  public orderSer:orderService,) {
+    this.getComps(); 
+    
+    }
+
+
 
   getComps() {
     this.rest.getComps(1)
@@ -53,7 +56,7 @@ export class BurgerStudioBunsPage {
   
   cancelOrder(){
     this.orderSer.items.pop(); 
-    this.orderSer.currentItem = this.orderSer.currentItem-1;
+    console.log(this.orderSer.currentItem);
     console.log(this.orderSer.items.length);
     
     this.navCtrl.setRoot(TabsPage);

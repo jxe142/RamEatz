@@ -103,7 +103,6 @@ export class BurgerStudioCompsPage {
   
   cancelOrder(){
     this.orderSer.items.pop(); 
-    this.orderSer.currentItem = this.orderSer.currentItem-1;
     console.log(this.orderSer.items.length);
     
     this.navCtrl.setRoot(TabsPage);

@@ -16,7 +16,7 @@ export class orderService {
 
    constructor() {
        this.currentItem = 0;
-       this.student = 1;
+       this.student = 1; //Make dynamic 
 
     }
 
@@ -35,7 +35,9 @@ export class orderService {
        if (data == 'end'){
            this.currentItem++; //Move to the next item for the order
         } else { //Make the comps for the current item
-            console.log(this.items);            
+            console.log(this.items);
+            console.log(this.currentItem);
+                        
             var cItem = this.items[this.currentItem];
             var currentComp = new comp();
             currentComp.name = data.name;

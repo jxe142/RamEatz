@@ -76,9 +76,7 @@ export class BurgerStudioCheesePage {
   
   cancelOrder(){
     this.orderSer.items.pop(); 
-    this.orderSer.currentItem = this.orderSer.currentItem-1;
     console.log(this.orderSer.items.length);
-    
     this.navCtrl.setRoot(TabsPage);
     this.navCtrl.popToRoot();
     // console.log(this.orderSer.items.length);
