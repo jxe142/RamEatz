@@ -29,6 +29,11 @@ export class CartPage {
     this.getItems();    
   }
 
+  ionViewWillEnter() {
+    this.orderSer.orderPrice();
+    this.total = this.orderSer.total; 
+  }
+
   getItems() {
     this.itemList = this.orderSer.items;    
     this.orderSer.orderPrice();
