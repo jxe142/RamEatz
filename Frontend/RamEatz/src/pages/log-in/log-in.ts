@@ -3,6 +3,7 @@ import { IonicPage, NavController, NavParams, AlertController, MenuController } 
 import { RestProvider } from "../../providers/rest/rest";
 import { UserService } from "../../services/userService/user";
 import { TabsPage } from "../tabs/tabs";
+import { MyApp } from "../../app/app.component";
 
 
 /**
@@ -52,15 +53,17 @@ export class LogInPage {
         var userJson = data['user']   
         this.user.token = data['token']
         window.localStorage.setItem('token', data['token'])
-        this.user.firstName = userJson['firstName']
-        this.user.lastName = userJson['lastName']
-        this.user.userName = userJson['username']
-        this.user.userId = userJson['id']
-        this.user.dc = userJson['decliningBal']
-        this.user.swipes = userJson['mealSwipes']
+        window.localStorage.setItem('userName', userJson['username'])
+        window.localStorage.setItem('firstName', userJson['firstName'])
+        window.localStorage.setItem('lastName', userJson['lastName'])
+        window.localStorage.setItem('id', userJson['id'])
+        window.localStorage.setItem('dc', userJson['decliningBal'])
+        window.localStorage.setItem('swipes', userJson['mealSwipes'])
+        
+        
 
         // this.navCtrl.push("HomePage")
-        this.navCtrl.setRoot(TabsPage)
+        this.navCtrl.setRoot(MyApp)
         
       } 
       else {

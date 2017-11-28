@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, MenuController } from 'ionic-angular';
+import { NavController, MenuController,  } from 'ionic-angular';
 import { RestProvider } from "../../providers/rest/rest";
 import { Observable } from 'rxjs/Observable'
 
@@ -13,6 +13,7 @@ export class HomePage {
   data: any;
   itemList: Array<any> = [];
   username: string;
+  
   
 
   constructor(public navCtrl: NavController, public rest: RestProvider, public menu: MenuController) {
@@ -33,6 +34,23 @@ export class HomePage {
         this.data = data;
         console.log(this.data);
       });
+  }
+
+  openMenu() {
+    this.menu.open();
+    
+    
+    
+  }
+ 
+  closeMenu() {
+    this.menu.close();
+    console.log('close');
+    
+  }
+ 
+  toggleMenu() {
+    this.menu.toggle();
   }
 
   navToBurgerStudioPage() {

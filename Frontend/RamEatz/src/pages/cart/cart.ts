@@ -5,6 +5,8 @@ import { Observable } from 'rxjs/Observable'
 import { orderService } from "../../services/orderService/orderService";
 import { comp } from "../../models/Orders_Items_Comps/comps";
 import { TabsPage } from "../tabs/tabs";
+import { MyApp } from "../../app/app.component";
+import { query } from '@angular/core/src/animation/dsl';
 
 /**
  * Generated class for the CartPage page.
@@ -30,8 +32,10 @@ export class CartPage {
   }
 
   ionViewWillEnter() {
+    if(this.orderSer.newItem){
     this.orderSer.orderPrice();
-    this.total = this.orderSer.total; 
+    this.total = this.orderSer.total;
+    } 
   }
 
   getItems() {
@@ -46,10 +50,16 @@ export class CartPage {
 
   submitOrder(){
     var json = JSON.stringify(this.orderSer);
+    var newDc = String(parseInt( localStorage.getItem('dc')) - this.orderSer.total)
+    localStorage.setItem('dc', newDc)
     console.log(json);
     this.rest.placeOrder(json);
-    
-    
+    this.orderSer.subTotal = 0
+    this.orderSer.total = 0
+    this.orderSer.items = []
+    this.itemList = []
+    this.orderSer.currentItem = 0  
+    this.navCtrl.push(MyApp);
   }
 
   

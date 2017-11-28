@@ -17,42 +17,33 @@
 
     <ion-card>
             <ion-card-header>
-              Explore Nearby
+              Welcome {{firstName}} {{lastName}}
             </ion-card-header>
-          
             <ion-list>
-              <button ion-item>
-                <ion-icon name="cart" item-start></ion-icon>
-                Shopping
+            <button ion-item>
+                <ion-icon name="ios-heart" item-start></ion-icon>
+                Faviorties
               </button>
           
               <button ion-item>
-                <ion-icon name="medical" item-start></ion-icon>
-                Hospital
+                <ion-icon name="ios-time" item-start></ion-icon>
+                Past Orders
+              </button>
+          
+            
+              <button ion-item>
+                <ion-icon name="md-cash" item-start></ion-icon>
+                <span id="dc">Declining Balance: {{dc}}</span>
               </button>
           
               <button ion-item>
-                <ion-icon name="cafe" item-start></ion-icon>
-                Cafe
+                <ion-icon name="ios-card" item-start></ion-icon>                    
+                Swipes: {{swipes}}
               </button>
-          
-              <button ion-item>
-                <ion-icon name="paw" item-start></ion-icon>
-                Dog Park
-              </button>
-          
-              <button ion-item>
-                <ion-icon name="beer" item-start></ion-icon>
-                Pub
-              </button>
-          
-              <button ion-item>
-                <ion-icon name="planet" item-start></ion-icon>
-                Space
-              </button>
-          
             </ion-list>
           </ion-card>
+
+          <img class="ram" src="../../assets/imgs/ram-logo-article.jpg" />
 </ion-menu>
 
 
