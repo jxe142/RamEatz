@@ -25,14 +25,22 @@ export class LogInPage {
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public rest:RestProvider, 
     public user: UserService, public alertCtrl: AlertController, public menu: MenuController) {
+      
   }
 
-  ionViewDidLoad() {
+  ionViewWillEnter() {
     console.log('ionViewDidLoad LogInPage');
     this.menu.swipeEnable(false, 'left');
     this.menu.enable(false, 'left');
-    
+    let tabs = document.querySelectorAll('.tabbar');
+    if ( tabs !== null ) {
+      Object.keys(tabs).map((key) => {
+        tabs[ key ].style.transform = 'translateY(56px)';
+      });
+    } // end if   
   }
+
+  
 
   showAlert() {
     let alert = this.alertCtrl.create({
