@@ -49,17 +49,24 @@ export class CartPage {
   
 
   submitOrder(){
-    var json = JSON.stringify(this.orderSer);
-    var newDc = String(parseInt( localStorage.getItem('dc')) - this.orderSer.total)
-    localStorage.setItem('dc', newDc)
-    console.log(json);
-    this.rest.placeOrder(json);
-    this.orderSer.subTotal = 0
-    this.orderSer.total = 0
-    this.orderSer.items = []
-    this.itemList = []
-    this.orderSer.currentItem = 0  
-    this.navCtrl.push(MyApp);
+    var token = localStorage.getItem('token')
+    if(token){
+      this.orderSer.student = parseInt( localStorage.getItem('id'))
+      var json = JSON.stringify(this.orderSer);
+      console.log(json);
+      this.rest.placeOrder(json); 
+      var newDc = String(parseInt( localStorage.getItem('dc')) - this.orderSer.total)
+      localStorage.setItem('dc', newDc)     
+      this.orderSer.subTotal = 0
+      this.orderSer.total = 0
+      this.orderSer.items = []
+      this.itemList = []
+      this.orderSer.currentItem = 0  
+      this.navCtrl.push(MyApp);
+    } else {
+      this.rest.clearUserData()
+      this.navCtrl.setRoot("LogInPage")
+    }
   }
 
   

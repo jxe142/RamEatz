@@ -2,6 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { HttpHeaders } from "@angular/common/http";
 import { HttpHeaderResponse } from '@angular/common/http/src/response';
+import { NavController } from 'ionic-angular';
+
+
 // import { HttpHeaders } from '@angular/common/http/src/headers';
 
 /*
@@ -18,16 +21,35 @@ export class RestProvider {
     console.log('Hello RestProvider Provider');
   }
 
+ 
+
+  clearUserData(){    
+    localStorage.removeItem('dc')
+    localStorage.removeItem('firstName')
+    localStorage.removeItem('id')
+    localStorage.removeItem('lastName')
+    localStorage.removeItem('swipes')
+    localStorage.removeItem('userName')
+    localStorage.removeItem('token')
+  }
+
   
 
   getMItems(vendor) {
+    var token = localStorage.getItem('token')
     return new Promise(resolve => {
       this.http.get(this.apiUrl + '/mItems/', {
-        headers: new HttpHeaders().set('vendor', vendor.toString()),
+        headers: new HttpHeaders({'vendor': vendor.toString(), 'token' : token}),
       }).subscribe(data => {
         resolve(data);
       }, err => {
         console.log(err);
+        if (err['status'] == 401)
+        {
+          this.clearUserData()
+          resolve(err)
+
+        }
       });
     });
   }
@@ -48,13 +70,20 @@ export class RestProvider {
   }
 
   getComps(vendor) {
+    var token = localStorage.getItem('token')
     return new Promise(resolve => {
       this.http.get(this.apiUrl + '/comps/', {
-        headers: new HttpHeaders().set('vendor', vendor.toString()),
+        headers: new HttpHeaders({'vendor': vendor.toString(), 'token': token}),
       }).subscribe(data => {
         resolve(data);
       }, err => {
-        console.log(err);
+        console.log(err['status']);
+        if (err['status'] == 401)
+        {
+          this.clearUserData()
+          resolve(err)
+
+        }
       });
     });
   }
@@ -87,14 +116,23 @@ export class RestProvider {
 
 
   placeOrder(data) {
+    var token = localStorage.getItem('token')
+        
     return new Promise((resolve, reject) => {
       this.http.post(this.apiUrl + '/orders/', JSON.stringify(data), {
-        headers: new HttpHeaders().set('Content-Type', 'application/json'),
+        headers: new HttpHeaders().set('token', token)
+          .set('Content-Type', 'application/json')
       })
         .subscribe(res => {
           resolve(res);
         }, (err) => {
-          reject(err);
+          console.log(err['status']);
+          if (err['status'] == 401)
+          {
+            this.clearUserData()
+            resolve(err)
+  
+          }
         });
     });
   }
@@ -105,7 +143,8 @@ export class RestProvider {
         .subscribe(res => {
           resolve(res);
         }, (err) => {
-          reject(err);
+          console.log(err);
+          
         });
     });
   }

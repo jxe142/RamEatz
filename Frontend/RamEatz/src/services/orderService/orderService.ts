@@ -13,10 +13,11 @@ export class orderService {
    items: Array<item> = []; //Type items
    cook: number;
    currentItem: number;
+   newItem: boolean =false; 
 
    constructor() {
        this.currentItem = 0;
-       this.student = 1; //Make dynamic 
+       this.student = 0; //Make dynamic 
 
     }
 
@@ -31,9 +32,19 @@ export class orderService {
        
    }
 
+   reset(){
+    this.student = 0
+    this.subTotal = 0
+    this.total = 0
+    this.items = []
+    this.currentItem = 0 
+    this.newItem = false
+   }
+
    makeComp(data){
        if (data == 'end'){
            this.currentItem++; //Move to the next item for the order
+           this.newItem = true;
         } else { //Make the comps for the current item
             console.log(this.items);
             console.log(this.currentItem);
@@ -62,6 +73,7 @@ export class orderService {
         this.total = this.subTotal * 1.07;
         console.log(this.total);
         this.total = this.total;
+        this.newItem = false;
         
     }
        

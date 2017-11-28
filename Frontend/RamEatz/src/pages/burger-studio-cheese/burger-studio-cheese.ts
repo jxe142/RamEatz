@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable'
 import { orderService } from "../../services/orderService/orderService";
 import { comp } from "../../models/Orders_Items_Comps/comps";
 import { TabsPage } from "../tabs/tabs";
+import { LOCATION_INITIALIZED } from '@angular/common';
 
 /**
  * Generated class for the BurgerStudioCheesePage page.
@@ -41,9 +42,16 @@ export class BurgerStudioCheesePage {
   }
 
   getComps() {
+    var token = localStorage.getItem('token')
+    if(token){
     this.rest.getComps(1)
       .then(data => {
         var count = 0;
+        if(data['status'] == 401){
+          this.rest.clearUserData()
+          this.navCtrl.setRoot("LogInPage")
+        } else {
+
         for (const item in data) {
           if (data.hasOwnProperty(item)) {
             const element = data[item];
@@ -54,7 +62,13 @@ export class BurgerStudioCheesePage {
             }      
           }
         }
+      }
       });
+    } else {
+      this.rest.clearUserData()
+      this.navCtrl.setRoot("LogInPage")
+    }
+
   }
 
   submitOrder(){

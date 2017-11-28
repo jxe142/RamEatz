@@ -131,7 +131,8 @@ def quick():
 class OrdersList(Resource):
 
     # @token_needed  # Get the all the past orders for that student
-    def get(self):
+    @token_needed
+    def get(self, currentUser):
         # myOrders = Orders.
         user = request.headers['id']
         jSon = '{'
@@ -184,9 +185,9 @@ class OrdersList(Resource):
         return Response(jSon,  mimetype='application/json')
         
 
-    # @token_needed  # Make the order for that student
+    @token_needed  # Make the order for that student
     # def post(currentUser, self):
-    def post(self):
+    def post(self, currentUser):
         data = json.loads(request.get_json())
         items = []
         comps = []
@@ -390,7 +391,8 @@ class Comps(Resource):
     
     #Returns all that vendors items
     #params include the id for the vendor to get htier itesm
-    def get(self):
+    @token_needed
+    def get(self, currentUser):
         myList = []
 
         try:
@@ -515,7 +517,8 @@ class Comps(Resource):
     
     #Returns all that vendors items
     #params include the id for the vendor to get htier itesm
-    def get(self):
+    @token_needed
+    def get(self, currentUser):
         myList = []
 
         try:
@@ -617,9 +620,9 @@ def makeVendors():
 
 @app.route('/post_user', methods=['GET', 'POST'])
 def post_user():
-    user = Students('jevans116', 'test@mail', 'password', 'Joel', 'Evas')  # make object
-    user.decliningBal = 400
-    user.mealSwipes = 50
+    user = Students('tom115', 'tom@mail', 'password123', 'Tom', 'Hanks')  # make object
+    user.decliningBal = 300
+    user.mealSwipes = 20
     db.session.add(user)  # save to database
     db.session.commit()
     return "Hi"

@@ -7,6 +7,7 @@ import { HomePage } from "../pages/home/home";
 import { RestProvider } from "../providers/rest/rest";
 
 import { UserService } from "../services/userService/user";
+import { orderService } from "../services/orderService/orderService";
 
 import { TabsPage } from '../pages/tabs/tabs';
 import { Nav } from 'ionic-angular/components/nav/nav';
@@ -28,7 +29,7 @@ export class MyApp {
 
   @ViewChild(Nav) nav:Nav;
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, public rest: RestProvider,
-  public user: UserService, public menu: MenuController) {  
+  public user: UserService, public menu: MenuController, public orderSer: orderService) {  
     
     var token = localStorage.getItem('token')
     if (token === null) {
@@ -41,6 +42,9 @@ export class MyApp {
       if(data['status'] == 401){
         this.rootPage = "LogInPage";
       } else {
+
+        console.log(data);
+        
         
         var userJson = localStorage.getItem('user')
         userJson = JSON.stringify(user);
@@ -65,6 +69,13 @@ export class MyApp {
       statusBar.styleDefault();
       splashScreen.hide();
     });
+  }
+
+  logOut(){
+    this.orderSer.reset()
+    this.rest.clearUserData()
+    this.nav.setRoot('LogInPage')
+    
   }
 
 }

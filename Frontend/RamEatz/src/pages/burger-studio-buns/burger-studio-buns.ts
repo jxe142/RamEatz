@@ -35,9 +35,18 @@ export class BurgerStudioBunsPage {
 
 
   getComps() {
+    var token = localStorage.getItem("token")
+    if(token){    
     this.rest.getComps(1)
       .then(data => {
         var count = 0;
+        console.log(data);
+        
+        if(data['status'] == 401){
+          this.rest.clearUserData()
+          this.navCtrl.setRoot("LogInPage")
+        } else {
+
         for (const item in data) {
           if (data.hasOwnProperty(item)) {
             const element = data[item];
@@ -47,7 +56,12 @@ export class BurgerStudioBunsPage {
             }                
           }
         }
+      }
       });
+    }else {
+      this.rest.clearUserData()
+      this.navCtrl.setRoot("LogInPage")
+    }
   }
 
   submitOrder(comp){

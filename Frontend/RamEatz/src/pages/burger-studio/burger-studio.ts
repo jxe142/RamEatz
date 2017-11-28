@@ -4,6 +4,7 @@ import { RestProvider } from "../../providers/rest/rest";
 import { Observable } from 'rxjs/Observable'
 import { orderService } from "../../services/orderService/orderService";
 import { item } from "../../models/Orders_Items_Comps/items";
+import { LOCATION_INITIALIZED } from '@angular/common';
 
 /**
  * Generated class for the BurgerStudioPage page.
@@ -39,8 +40,15 @@ export class BurgerStudioPage {
 
 
   getItems() {
+    var token = localStorage.getItem("token")
+    if(token){
     this.rest.getMItems(1)
       .then(data => {
+        if(data['status'] == 401){
+          this.rest.clearUserData()
+          this.navCtrl.setRoot("LogInPage")
+        } else {
+
         for (const item in data) {
           if (data.hasOwnProperty(item)) {
             const element = data[item];
@@ -50,7 +58,12 @@ export class BurgerStudioPage {
             
           }
         }
+      }
       });
+    } else {
+      this.rest.clearUserData()
+      this.navCtrl.setRoot("LogInPage")
+    }
   }
 
 

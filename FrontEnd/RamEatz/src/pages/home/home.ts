@@ -31,8 +31,13 @@ export class HomePage {
   getUsers() {
     this.rest.getUsers()
       .then(data => {
+        if(data['status'] == 401){
+          this.rest.clearUserData()
+          this.navCtrl.setRoot("LogInPage")
+        } else {
         this.data = data;
         console.log(this.data);
+        }
       });
   }
 
