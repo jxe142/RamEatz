@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Observable'
 import { orderService } from "../../services/orderService/orderService";
 import { item } from "../../models/Orders_Items_Comps/items";
 import { LOCATION_INITIALIZED } from '@angular/common';
-
+import { MyApp } from "../../app/app.component";
 /**
  * Generated class for the BurgerStudioPage page.
  *

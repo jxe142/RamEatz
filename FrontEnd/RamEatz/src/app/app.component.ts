@@ -3,7 +3,6 @@ import { Platform, MenuController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { HomePage } from "../pages/home/home";
-
 import { RestProvider } from "../providers/rest/rest";
 
 import { UserService } from "../services/userService/user";
