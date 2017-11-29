@@ -16,9 +16,16 @@ import datetime
 # Config of the app
 #==============================================================
 app = Flask(__name__)  # Makes the flask app
+
+# Joel's DB
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://joelevans:@localhost/rameatz'
+# Austin's DB
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///rameatz'
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)  # Makes our postgresql database
 api = Api(app)  # Makes a flask restplus api
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://joelevans:@localhost/rameatz'
 SECRET_KEY = os.urandom(24)
 app.config['SECRET_KEY'] = SECRET_KEY
 auth = HTTPBasicAuth()
